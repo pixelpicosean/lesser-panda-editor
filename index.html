@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mithril Level Editor</title>
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Verdana;
+
+      color: #fff;
+      background-color: #363f45;
+    }
+    html, body {
+      height: 100%;
+    }
+    li {
+      list-style-type: none;
+    }
+
+    /* Layout */
+    .max-size {
+      width: 100%;
+      height: 100%;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+
+      padding-left: 1em;
+    }
+
+    .sidebar {
+      min-width: 200px;
+
+      background-color: #607d8b;
+
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar .content {
+      padding-left: 1em;
+    }
+
+    .y-overflow {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-height: 0px;
+    }
+
+    .header {
+      text-align: center;
+
+      font-size: 24px;
+      min-height: 40px;
+
+      background-color: #455a64;
+    }
+
+    #app {
+      height: 100%;
+
+      display: flex;
+    }
+
+    /* Theme */
+    .shadow.left {
+      box-shadow: 3px 0 10px rgba(0,0,0,0.23),
+                  3px 0 10px rgba(0,0,0,0.16);
+    }
+    .shadow.right {
+      box-shadow: -3px 0 10px rgba(0,0,0,0.23),
+                  -3px 0 10px rgba(0,0,0,0.16);
+    }
+  </style>
+</head>
+<body>
+  <section id="app"></section>
+
+
+  <script src="mithril.js"></script>
+  <script>
+    // Model
+    var Actor = function(name) {
+      this.name = name || 'Untitled';
+      this.position = { x: 0, y: 0 };
+
+      this.children = [];
+    };
+    Actor.prototype.addChild = function(child) {
+      (this.children.indexOf(child) === -1) && this.children.push(child);
+    };
+    Actor.prototype.removeChild = function(child) {
+      var idx = this.children.indexOf(child);
+      (idx !== -1) && this.children.splice(idx, 1);
+    };
+
+    // Components
+    var ActorEditComponent = {
+      controller: function() {
+        this.actor = new Actor('World');
+
+        var bg;
+
+        this.actor.addChild(bg = new Actor('Background'));
+        bg.addChild(new Actor('Parallel'));
+        bg.addChild(new Actor('Ground'));
+        this.actor.addChild(new Actor('Mario'));
+        this.actor.addChild(new Actor('HUD'));
+        for (var i = 0; i < 40; i++) {
+          this.actor.addChild(new Actor('HUD' + i));
+        }
+      },
+      view: function(controller) {
+        return [
+          m.component(ActorOutliner, { actor: controller.actor }),
+          m.component(ActorViewport, { actor: controller.actor }),
+          m.component(ActorInspector, { actor: controller.actor })
+        ];
+      }
+    };
+
+    var ActorOutliner = {
+      controller: function(args) {
+        this.actor = args.actor || new Actor();
+      },
+      view: function(controller) {
+        return m('aside.sidebar.left.shadow', [
+          m('header.header', 'Outliner'),
+          m('div.content.y-overflow', [
+            m('label', controller.actor.name),
+            m('ul.list', controller.actor.children.map(function mapActorRecursive(actor) {
+              return m('li', [
+                m('label', actor.name),
+                m('ul.list', actor.children.map(mapActorRecursive))
+              ]);
+            }))
+          ])
+        ]);
+      }
+    }
+
+    var ActorViewport = {
+      controller: function() {},
+      view: function() {
+        return m('canvas#viewport.max-size');
+      }
+    };
+
+    var ActorInspector = {
+      controller: function() {},
+      view: function() {
+        return m('aside.sidebar.right.shadow', [
+          m('header.header', 'Inspector')
+        ]);
+      }
+    };
+
+    // Start app
+    m.mount(document.getElementById('app'), ActorEditComponent);
+  </script>
+</body>
+</html>
