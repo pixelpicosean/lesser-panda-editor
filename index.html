@@ -11,10 +11,10 @@
       padding: 0;
     }
     body {
-      font-family: Verdana;
+      font-family: Roboto, HelveticaNeue-Light, 'Helvetica Neue', HelveticaNeue, Helvetica, Arial, Geneva, sans-serif;
 
-      color: #fff;
-      background-color: #363f45;
+      color: #9f9f9f;
+      background-color: #252525;
     }
     html, body {
       height: 100%;
@@ -37,17 +37,45 @@
       padding-left: 1em;
     }
 
+    .header {
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
     .sidebar {
       min-width: 200px;
 
-      background-color: #607d8b;
+      background-color: #1d1d1d;
 
       display: flex;
       flex-direction: column;
     }
 
-    .sidebar .content {
-      padding-left: 1em;
+    .sidebar > .header {
+      text-align: center;
+
+      font-size: 24px;
+      min-height: 40px;
+
+      background-color: #1d1d1d;
+
+      border-bottom: 1px solid #4e5254;
+    }
+
+    .sidebar header h2 {
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 40px;
+      text-align: center;
+
+      cursor: pointer;
+    }
+
+    .sidebar > .content {
+      padding: 10px;
+
+      font-weight: 300;
     }
 
     .y-overflow {
@@ -56,19 +84,119 @@
       min-height: 0px;
     }
 
-    .header {
-      text-align: center;
-
-      font-size: 24px;
-      min-height: 40px;
-
-      background-color: #455a64;
-    }
-
     #app {
       height: 100%;
 
       display: flex;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #313131;
+      background-color: #313131;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #252525;
+      background-color: #252525;
+    }
+
+    input::selection {
+      /*background-color: #cce2ff;*/
+      /*color: rgba(0, 0, 0, 0.8);*/
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=button].block {
+      display: block;
+      width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+
+      border: none;
+    }
+
+    .property-edit {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      -webkit-user-select: none;
+    }
+
+    .property-edit input {
+      margin-left: 3px;
+
+      background-color: #202020;
+      border-color: #202020;
+
+      outline: 0;
+    }
+
+    .property-edit input[type=number],
+    .property-edit input[type=text],
+    .property-edit input[type=spinner] {
+      padding: 2px;
+      box-sizing: border-box;
+      resize: none;
+
+      border: 1px solid #777;
+      border-radius: 3px;
+
+      font-size: 12px;
+      text-align: right;
+
+      text-decoration: none;
+
+      color: #9f9f9f;
+    }
+
+    .property-edit input[type=button] {
+      color: #868686;
+      background-color: #363636;
+    }
+
+    .property-edit input:nth-of-type(1) {
+      margin-left: 0;
+    }
+
+    .property-edit input:focus {
+      background-color: #1a1a1a;
+      border-color: #38b3f6;
+    }
+
+    .property-edit > label {
+      min-width: 35%;
+
+      margin: 0;
+      margin-right: 8px;
+      padding: 0;
+
+      font-size: 12px;
+      line-height: 2em;
+      text-align: left;
+      overflow: hidden;
+      white-space: nowrap;
+
+      color: #8697a3;
+
+      text-overflow: ellipsis;
+
+      flex-shrink: 0;
+    }
+
+    .property-edit > :not(label):not(input[type=checkbox]) {
+      flex-grow: 1;
+      min-width: 0;
     }
 
     /* Theme */
@@ -108,16 +236,20 @@
       controller: function() {
         this.actor = new Actor('World');
 
-        var bg;
+        var bgLayer, entLayer, uiLayer;
 
-        this.actor.addChild(bg = new Actor('Background'));
-        bg.addChild(new Actor('Parallel'));
-        bg.addChild(new Actor('Ground'));
-        this.actor.addChild(new Actor('Mario'));
-        this.actor.addChild(new Actor('HUD'));
+        this.actor.addChild(bgLayer = new Actor('bgLayer'));
+        bgLayer.addChild(new Actor('Parallel'));
+        bgLayer.addChild(new Actor('Ground'));
+
+        this.actor.addChild(entLayer = new Actor('entLayer'));
+        entLayer.addChild(new Actor('Mario'));
         for (var i = 0; i < 40; i++) {
-          this.actor.addChild(new Actor('HUD' + i));
+          entLayer.addChild(new Actor('Coin_' + i));
         }
+
+        this.actor.addChild(uiLayer = new Actor('uiLayer'));
+        uiLayer.addChild(new Actor('HUD'));
       },
       view: function(controller) {
         return [
@@ -156,10 +288,24 @@
     };
 
     var ActorInspector = {
-      controller: function() {},
+      controller: function(args) {
+        this.actor = args.actor;
+
+        // This component is editable ONLY when actor exists
+        this.editable = !!this.actor;
+      },
       view: function() {
         return m('aside.sidebar.right.shadow', [
-          m('header.header', 'Inspector')
+          m('header.header', 'Inspector'),
+          m('div.content.y-overflow', [
+            m('header', [
+              m('h2', 'ACTOR')
+            ]),
+            m('div.property-edit', [
+              m('label', 'Name'),
+              m('input[type=text]')
+            ])
+          ])
         ]);
       }
     };
