@@ -1,0 +1,7 @@
+{
+  "name": "mithril-level-editor",
+  "dependencies": {
+    "kefir": "~2.5.0",
+    "mithril": "~0.2.0"
+  }
+}

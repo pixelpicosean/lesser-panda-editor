@@ -63,7 +63,7 @@
       border-bottom: 1px solid #4e5254;
     }
 
-    .sidebar header h2 {
+    .sidebar h2 {
       font-weight: 300;
       font-size: 16px;
       line-height: 40px;
@@ -126,6 +126,8 @@
     }
 
     .property-edit {
+      margin-bottom: 5px;
+
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -214,42 +216,64 @@
   <section id="app"></section>
 
 
-  <script src="mithril.js"></script>
+  <script src="bower_components/mithril/mithril.js"></script>
+  <script src="bower_components/kefir/dist/kefir.js"></script>
+
   <script>
     // Model
-    var Actor = function(name) {
+    var Actor = function(name, x, y) {
       this.name = name || 'Untitled';
-      this.position = { x: 0, y: 0 };
+      this.position = { x: x || 0, y: y || 0 };
 
+      this.parent = null;
       this.children = [];
     };
     Actor.prototype.addChild = function(child) {
-      (this.children.indexOf(child) === -1) && this.children.push(child);
+      if (this.children.indexOf(child) === -1) {
+        child.parent && child.parent.removeChild(child);
+
+        child.parent = this;
+        this.children.push(child);
+      }
     };
     Actor.prototype.removeChild = function(child) {
       var idx = this.children.indexOf(child);
       (idx !== -1) && this.children.splice(idx, 1);
     };
 
+    var AnimationData = function() {
+      this.speed = 10;
+      this.loop = true;
+      this.frames = [];
+    };
+    var Animation = function(name) {
+      this.anchor = { x: 0, y: 0 };
+      this.textures = [];
+      this.anims = [];
+    };
+
     // Components
     var ActorEditComponent = {
       controller: function() {
-        this.actor = new Actor('World');
+        this.actor = new Actor('World', 20, 40);
 
         var bgLayer, entLayer, uiLayer;
 
-        this.actor.addChild(bgLayer = new Actor('bgLayer'));
-        bgLayer.addChild(new Actor('Parallel'));
-        bgLayer.addChild(new Actor('Ground'));
+        this.actor.addChild(bgLayer = new Actor('bgLayer', 20, 80));
+        bgLayer.addChild(new Actor('Parallel', 20, 120));
+        bgLayer.addChild(new Actor('Ground', 20, 160));
 
-        this.actor.addChild(entLayer = new Actor('entLayer'));
-        entLayer.addChild(new Actor('Mario'));
-        for (var i = 0; i < 40; i++) {
-          entLayer.addChild(new Actor('Coin_' + i));
+        this.actor.addChild(entLayer = new Actor('entLayer', 20, 200));
+        entLayer.addChild(new Actor('Mario', 20, 240));
+        for (var i = 0; i < 20; i++) {
+          entLayer.addChild(new Actor('Coin_' + i, 200, 40 * (i + 1)));
+        }
+        for (var i = 0; i < 20; i++) {
+          entLayer.addChild(new Actor('Coin_' + (i + 20), 400, 40 * (i + 1)));
         }
 
-        this.actor.addChild(uiLayer = new Actor('uiLayer'));
-        uiLayer.addChild(new Actor('HUD'));
+        this.actor.addChild(uiLayer = new Actor('uiLayer', 600, 40));
+        uiLayer.addChild(new Actor('HUD', 600, 80));
       },
       view: function(controller) {
         return [
@@ -281,9 +305,68 @@
     }
 
     var ActorViewport = {
-      controller: function() {},
-      view: function() {
-        return m('canvas#viewport.max-size');
+      controller: function(args) {
+        var controller = {
+          canvas: null,
+          context: null,
+
+          actor: args.actor,
+
+          config: function(element, isInitialized, ctx) {
+            // Don't redraw if we did once already.
+            if (isInitialized) return;
+
+            // Initialize stuff
+            controller.canvas = element;
+            controller.context = element.getContext('2d');
+
+            // Setup event stream and handlers
+            var whenToResize = Kefir.fromEvents(window, 'resize');
+            var whenToDraw = Kefir.merge([whenToResize]);
+
+            whenToResize.onValue(controller.resize);
+            whenToDraw.onValue(controller.draw);
+
+            // Unload behavior
+            controller.onunload = function() {
+              whenToResize.offValue(controller.resize);
+              whenToDraw.offValue(controller.draw);
+            };
+
+            // Resize canvas and draw the first time
+            controller.resize();
+            controller.draw();
+          },
+
+          resize: function() {
+            var w = controller.canvas.clientWidth;
+            var h = controller.canvas.clientHeight;
+
+            var pixelRatio = window.devicePixelRatio;
+
+            controller.canvas.width = w * pixelRatio;
+            controller.canvas.height = h * pixelRatio;
+          },
+          draw: function() {
+            controller.context.clearRect(0, 0, controller.canvas.width, controller.canvas.height);
+
+            controller.drawActor(controller.actor);
+          },
+          drawActor: function(actor) {
+            if (!actor) return;
+
+            controller.context.font = '32px Roboto';
+            controller.context.fillStyle = '#cddc39';
+            controller.context.fillText(actor.name, actor.position.x, actor.position.y);
+
+            actor.children.forEach(controller.drawActor);
+          }
+        };
+
+        return controller;
+      },
+      view: function(controller) {
+        return m('canvas#viewport.max-size', { config: controller.config });
       }
     };
 
@@ -294,16 +377,21 @@
         // This component is editable ONLY when actor exists
         this.editable = !!this.actor;
       },
-      view: function() {
+      view: function(controller) {
         return m('aside.sidebar.right.shadow', [
           m('header.header', 'Inspector'),
           m('div.content.y-overflow', [
-            m('header', [
-              m('h2', 'ACTOR')
-            ]),
+            // Actor
+            m('h2', 'GENERAL'),
             m('div.property-edit', [
               m('label', 'Name'),
-              m('input[type=text]')
+              m('input[type=text]', { readOnly: !controller.editable })
+            ]),
+
+            m('div.property-edit', [
+              m('label', 'Position'),
+              m('input[type=number]'),
+              m('input[type=number]')
             ])
           ])
         ]);
