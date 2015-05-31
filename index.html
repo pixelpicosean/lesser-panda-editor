@@ -385,16 +385,50 @@
             m('h2', 'GENERAL'),
             m('div.property-edit', [
               m('label', 'Name'),
-              m('input[type=text]', { readOnly: !controller.editable })
+              m.component(Input, 'text', controller.actor, 'name')
             ]),
 
             m('div.property-edit', [
               m('label', 'Position'),
-              m('input[type=number]'),
-              m('input[type=number]')
+              m.component(Input, 'number', controller.actor.position, 'x'),
+              m.component(Input, 'number', controller.actor.position, 'y')
             ])
           ])
         ]);
+      }
+    };
+
+    var Input = {
+      controller: function(type, obj, key) {
+        var prop = m.prop(obj[key]);
+        return {
+          type: type,
+          prop: prop,
+          confirm: function() {
+            obj[key] = prop();
+          }
+        };
+      },
+      view: function(controller) {
+        return m('input[type=' + controller.type + ']', {
+          oninput: m.withAttr('value', controller.prop),
+          onkeydown: function(e) {
+            if (e.keyCode === 13) {
+              this.blur();
+            }
+          },
+          onfocus: function() {
+            this.select();
+          },
+          onblur: function() {
+            controller.confirm();
+          },
+          onmouseup: function() {
+            // Prevent deselect on focus
+            return false;
+          },
+          value: controller.prop()
+        });
       }
     };
 
