@@ -217,13 +217,18 @@
 
 
   <script src="bower_components/mithril/mithril.js"></script>
-  <script src="bower_components/kefir/dist/kefir.js"></script>
+  <script src="flyd.js"></script>
 
   <script>
+    var attr = flyd.stream;
+
     // Model
     var Actor = function(name, x, y) {
-      this.name = name || 'Untitled';
-      this.position = { x: x || 0, y: y || 0 };
+      this.name = attr(name || 'Untitled');
+      this.position = {
+        x: attr(x || 0),
+        y: attr(y || 0)
+      };
 
       this.parent = null;
       this.children = [];
@@ -292,10 +297,10 @@
         return m('aside.sidebar.left.shadow', [
           m('header.header', 'Outliner'),
           m('div.content.y-overflow', [
-            m('label', controller.actor.name),
+            m('label', controller.actor.name()),
             m('ul.list', controller.actor.children.map(function mapActorRecursive(actor) {
               return m('li', [
-                m('label', actor.name),
+                m('label', actor.name()),
                 m('ul.list', actor.children.map(mapActorRecursive))
               ]);
             }))
@@ -321,16 +326,17 @@
             controller.context = element.getContext('2d');
 
             // Setup event stream and handlers
-            var whenToResize = Kefir.fromEvents(window, 'resize');
-            var whenToDraw = Kefir.merge([whenToResize]);
+            var whenToResize = flyd.stream();
+            window.addEventListener('resize', whenToResize);
 
-            whenToResize.onValue(controller.resize);
-            whenToDraw.onValue(controller.draw);
+            var whenToDraw = flyd.stream([whenToResize]);
+
+            flyd.map(controller.resize, whenToResize);
+            flyd.map(controller.draw, whenToDraw);
 
             // Unload behavior
             controller.onunload = function() {
-              whenToResize.offValue(controller.resize);
-              whenToDraw.offValue(controller.draw);
+              window.removeEventListener('resize', whenToResize);
             };
 
             // Resize canvas and draw the first time
@@ -357,7 +363,7 @@
 
             controller.context.font = '32px Roboto';
             controller.context.fillStyle = '#cddc39';
-            controller.context.fillText(actor.name, actor.position.x, actor.position.y);
+            controller.context.fillText(actor.name(), actor.position.x(), actor.position.y());
 
             actor.children.forEach(controller.drawActor);
           }
@@ -372,10 +378,15 @@
 
     var ActorInspector = {
       controller: function(args) {
-        this.actor = args.actor;
+        var c = {
+          actor: args.actor,
+          editable: !!args.actor,
 
-        // This component is editable ONLY when actor exists
-        this.editable = !!this.actor;
+          xChanged: function() {},
+          yChanged: function() {},
+          nameChanged: function() {}
+        };
+        return c;
       },
       view: function(controller) {
         return m('aside.sidebar.right.shadow', [
@@ -385,13 +396,13 @@
             m('h2', 'GENERAL'),
             m('div.property-edit', [
               m('label', 'Name'),
-              m.component(Input, 'text', controller.actor, 'name')
+              m.component(Input, 'text', controller.actor.name, controller.nameChanged)
             ]),
 
             m('div.property-edit', [
               m('label', 'Position'),
-              m.component(Input, 'number', controller.actor.position, 'x'),
-              m.component(Input, 'number', controller.actor.position, 'y')
+              m.component(Input, 'number', controller.actor.position.x, controller.xChanged),
+              m.component(Input, 'number', controller.actor.position.y, controller.yChanged)
             ])
           ])
         ]);
@@ -399,13 +410,16 @@
     };
 
     var Input = {
-      controller: function(type, obj, key) {
-        var prop = m.prop(obj[key]);
+      controller: function(type, value, changeCallback) {
+        // Tmp variable for saving editing data
+        var prop = m.prop(value());
+
         return {
           type: type,
           prop: prop,
           confirm: function() {
-            obj[key] = prop();
+            // Action
+            changeCallback(prop());
           }
         };
       },
