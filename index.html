@@ -230,14 +230,14 @@
         y: attr(y || 0)
       };
 
-      this.parent = null;
+      this.parent = attr();
       this.children = [];
     };
     Actor.prototype.addChild = function(child) {
       if (this.children.indexOf(child) === -1) {
-        child.parent && child.parent.removeChild(child);
+        child.parent() && child.parent().removeChild(child);
 
-        child.parent = this;
+        child.parent(this);
         this.children.push(child);
       }
     };
@@ -246,16 +246,18 @@
       (idx !== -1) && this.children.splice(idx, 1);
     };
 
-    var AnimationData = function() {
-      this.speed = 10;
-      this.loop = true;
-      this.frames = [];
+    var Sprite = function(name, x, y, texture) {
+      Actor.call(this, name, x, y);
+
+      this.anchor = {
+        x: attr(0),
+        y: attr(0)
+      };
+
+      this.texture = attr(texture || '');
     };
-    var Animation = function(name) {
-      this.anchor = { x: 0, y: 0 };
-      this.textures = [];
-      this.anims = [];
-    };
+    Sprite.prototype = Object.create(Actor.prototype);
+    Sprite.prototype.constructor = Actor;
 
     // Components
     var ActorEditComponent = {
@@ -271,14 +273,14 @@
         this.actor.addChild(entLayer = new Actor('entLayer', 20, 200));
         entLayer.addChild(new Actor('Mario', 20, 240));
         for (var i = 0; i < 20; i++) {
-          entLayer.addChild(new Actor('Coin_' + i, 200, 40 * (i + 1)));
+          entLayer.addChild(new Sprite('Coin_' + i, 200, 40 * (i + 1)));
         }
         for (var i = 0; i < 20; i++) {
-          entLayer.addChild(new Actor('Coin_' + (i + 20), 400, 40 * (i + 1)));
+          entLayer.addChild(new Sprite('Coin_' + (i + 20), 400, 40 * (i + 1)));
         }
 
         this.actor.addChild(uiLayer = new Actor('uiLayer', 600, 40));
-        uiLayer.addChild(new Actor('HUD', 600, 80));
+        uiLayer.addChild(new Sprite('HUD', 600, 80));
       },
       view: function(controller) {
         return [
