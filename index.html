@@ -321,12 +321,15 @@
 
         // Select the root by default
         this.selected = attr(this.root());
+
+        // Setup streams
+        this.whenModelChanged = flyd.stream();
       },
       view: function(controller) {
         return [
-          m.component(ActorOutliner, { actor: controller.root, selected: controller.selected }),
-          m.component(ActorViewport, { actor: controller.root, selected: controller.selected }),
-          m.component(ActorInspector, { actor: controller.selected })
+          m.component(ActorOutliner, { actor: controller.root, selected: controller.selected, whenModelChanged: controller.whenModelChanged }),
+          m.component(ActorViewport, { actor: controller.root, selected: controller.selected, whenModelChanged: controller.whenModelChanged }),
+          m.component(ActorInspector, { actor: controller.selected, whenModelChanged: controller.whenModelChanged })
         ];
       }
     };
@@ -391,7 +394,7 @@
             var whenToResize = flyd.stream();
             window.addEventListener('resize', whenToResize);
 
-            var whenToDraw = flyd.stream([whenToResize]);
+            var whenToDraw = flyd.merge(whenToResize, args.whenModelChanged);
 
             flyd.map(controller.resize, whenToResize);
             flyd.map(controller.draw, whenToDraw);
@@ -443,10 +446,10 @@
         var c = {
           actor: args.actor,
 
-          nameChanged: function(name) { c.actor().name(name); },
+          nameChanged: function(name) { c.actor().name(name); args.whenModelChanged({ key: 'name', value: name }); },
 
-          posXChanged: function(x) { c.actor().position.x(x); },
-          posYChanged: function(y) { c.actor().position.y(y); }
+          posXChanged: function(x) { c.actor().position.x(x); args.whenModelChanged({ key: 'position.x', value: x }); },
+          posYChanged: function(y) { c.actor().position.y(y); args.whenModelChanged({ key: 'position.y', value: y }); }
         };
         return c;
       },
