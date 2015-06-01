@@ -78,6 +78,34 @@
       font-weight: 300;
     }
 
+    .tree {
+      font-size: 14px;
+    }
+
+    .tree li {
+      width: 100%;
+    }
+
+    .tree .leaf {
+      width: 100%;
+
+      padding: 5px 10px 5px 0;
+
+      cursor: pointer;
+    }
+
+    .tree .leaf > label {
+      height: 28px;
+      min-height: 28px;
+      line-height: 19px;
+
+      cursor: pointer;
+    }
+
+    .tree .selected {
+      background: #363636;
+    }
+
     .y-overflow {
       flex: 1 1 auto;
       overflow-y: auto;
@@ -224,6 +252,8 @@
 
     // Model
     var Actor = function(name, x, y) {
+      this.id = Actor.uid++;
+
       this.name = attr(name || 'Untitled');
       this.position = {
         x: attr(x || 0),
@@ -243,8 +273,12 @@
     };
     Actor.prototype.removeChild = function(child) {
       var idx = this.children.indexOf(child);
-      (idx !== -1) && this.children.splice(idx, 1);
+      if (idx !== -1) {
+        child.parent();
+        this.children.splice(idx, 1);
+      }
     };
+    Actor.uid = 0;
 
     var Sprite = function(name, x, y, texture) {
       Actor.call(this, name, x, y);
@@ -262,50 +296,76 @@
     // Components
     var ActorEditComponent = {
       controller: function() {
-        this.actor = new Actor('World', 20, 40);
+        // Setup model
+        this.root = attr(new Actor('World', 20, 40));
 
-        var bgLayer, entLayer, uiLayer;
+        var bgLayer = attr(),
+          entLayer = attr(),
+          uiLayer = attr();
 
-        this.actor.addChild(bgLayer = new Actor('bgLayer', 20, 80));
-        bgLayer.addChild(new Actor('Parallel', 20, 120));
-        bgLayer.addChild(new Actor('Ground', 20, 160));
+        this.root().addChild(bgLayer(new Actor('bgLayer', 20, 80))());
+        bgLayer().addChild(new Actor('Parallel', 20, 120));
+        bgLayer().addChild(new Actor('Ground', 20, 160));
 
-        this.actor.addChild(entLayer = new Actor('entLayer', 20, 200));
-        entLayer.addChild(new Actor('Mario', 20, 240));
+        this.root().addChild(entLayer(new Actor('entLayer', 20, 200))());
+        entLayer().addChild(new Actor('Mario', 20, 240));
         for (var i = 0; i < 20; i++) {
-          entLayer.addChild(new Sprite('Coin_' + i, 200, 40 * (i + 1)));
+          entLayer().addChild(new Sprite('Coin_' + i, 200, 40 * (i + 1)));
         }
         for (var i = 0; i < 20; i++) {
-          entLayer.addChild(new Sprite('Coin_' + (i + 20), 400, 40 * (i + 1)));
+          entLayer().addChild(new Sprite('Coin_' + (i + 20), 400, 40 * (i + 1)));
         }
 
-        this.actor.addChild(uiLayer = new Actor('uiLayer', 600, 40));
-        uiLayer.addChild(new Sprite('HUD', 600, 80));
+        this.root().addChild(uiLayer(new Actor('uiLayer', 600, 40))());
+        uiLayer().addChild(new Sprite('HUD', 600, 80));
+
+        // Select the root by default
+        this.selected = attr(this.root());
       },
       view: function(controller) {
         return [
-          m.component(ActorOutliner, { actor: controller.actor }),
-          m.component(ActorViewport, { actor: controller.actor }),
-          m.component(ActorInspector, { actor: controller.actor })
+          m.component(ActorOutliner, { actor: controller.root, selected: controller.selected }),
+          m.component(ActorViewport, { actor: controller.root, selected: controller.selected }),
+          m.component(ActorInspector, { actor: controller.selected })
         ];
       }
     };
 
     var ActorOutliner = {
       controller: function(args) {
-        this.actor = args.actor || new Actor();
+        var c = {
+          actor: args.actor(),
+          selectedId: args.actor().id,
+
+          select: function(actor) {
+            args.selected(actor);
+            // console.log('select: %s', actor.name());
+          }
+        };
+
+        flyd.map(function(selected) {
+          c.selectedId = selected.id;
+        }, args.selected);
+
+        return c;
       },
       view: function(controller) {
         return m('aside.sidebar.left.shadow', [
           m('header.header', 'Outliner'),
-          m('div.content.y-overflow', [
-            m('label', controller.actor.name()),
-            m('ul.list', controller.actor.children.map(function mapActorRecursive(actor) {
-              return m('li', [
-                m('label', actor.name()),
-                m('ul.list', actor.children.map(mapActorRecursive))
-              ]);
-            }))
+          m('ul.content.tree.y-overflow', [
+            m('li', [
+              m('div.leaf' + (controller.selectedId === controller.actor.id ? '.selected' : ''), [
+                m('label', controller.actor.name()),
+              ]),
+              m('ul.list', controller.actor.children.map(function mapActorRecursive(actor) {
+                return m('li', [
+                  m('div.leaf' + (controller.selectedId === actor.id ? '.selected' : ''), { onmousedown: controller.select.bind(controller, actor) }, [
+                    m('label', actor.name()),
+                  ]),
+                  m('ul.list', actor.children.map(mapActorRecursive))
+                ]);
+              }))
+            ])
           ])
         ]);
       }
@@ -358,7 +418,7 @@
           draw: function() {
             controller.context.clearRect(0, 0, controller.canvas.width, controller.canvas.height);
 
-            controller.drawActor(controller.actor);
+            controller.drawActor(controller.actor());
           },
           drawActor: function(actor) {
             if (!actor) return;
@@ -382,11 +442,11 @@
       controller: function(args) {
         var c = {
           actor: args.actor,
-          editable: !!args.actor,
 
-          xChanged: function() {},
-          yChanged: function() {},
-          nameChanged: function() {}
+          nameChanged: function(name) { c.actor().name(name); },
+
+          posXChanged: function(x) { c.actor().position.x(x); },
+          posYChanged: function(y) { c.actor().position.y(y); }
         };
         return c;
       },
@@ -398,13 +458,13 @@
             m('h2', 'GENERAL'),
             m('div.property-edit', [
               m('label', 'Name'),
-              m.component(Input, 'text', controller.actor.name, controller.nameChanged)
+              m.component(Input, 'text', controller.actor().name, controller.nameChanged)
             ]),
 
             m('div.property-edit', [
               m('label', 'Position'),
-              m.component(Input, 'number', controller.actor.position.x, controller.xChanged),
-              m.component(Input, 'number', controller.actor.position.y, controller.yChanged)
+              m.component(Input, 'number', controller.actor().position.x, controller.posXChanged),
+              m.component(Input, 'number', controller.actor().position.y, controller.posYChanged)
             ])
           ])
         ]);
@@ -412,7 +472,7 @@
     };
 
     var Input = {
-      controller: function(type, value, changeCallback) {
+      controller: function(type, value, changeHandler) {
         // Tmp variable for saving editing data
         var prop = m.prop(value());
 
@@ -421,7 +481,7 @@
           prop: prop,
           confirm: function() {
             // Action
-            changeCallback(prop());
+            changeHandler(prop());
           }
         };
       },
