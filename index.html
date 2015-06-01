@@ -339,7 +339,7 @@
 
           select: function(actor) {
             args.selected(actor);
-            // console.log('select: %s', actor.name());
+            // console.log('[Outliner] select: %s', actor.name());
           }
         };
 
@@ -458,54 +458,46 @@
             m('h2', 'GENERAL'),
             m('div.property-edit', [
               m('label', 'Name'),
-              m.component(Input, 'text', controller.actor().name, controller.nameChanged)
+              input('text', controller.actor().name, controller.nameChanged)
             ]),
 
             m('div.property-edit', [
               m('label', 'Position'),
-              m.component(Input, 'number', controller.actor().position.x, controller.posXChanged),
-              m.component(Input, 'number', controller.actor().position.y, controller.posYChanged)
+              input('number', controller.actor().position.x, controller.posXChanged),
+              input('number', controller.actor().position.y, controller.posYChanged)
             ])
           ])
         ]);
       }
     };
 
-    var Input = {
-      controller: function(type, value, changeHandler) {
-        // Tmp variable for saving editing data
-        var prop = m.prop(value());
-
-        return {
-          type: type,
-          prop: prop,
-          confirm: function() {
-            // Action
-            changeHandler(prop());
+    function input(type, value, changeHandler) {
+      return m('input[type=' + type + ']', {
+        config: function(el, init, ctx) {
+          if (ctx.val && ctx.val === value) {
+            return;
           }
-        };
-      },
-      view: function(controller) {
-        return m('input[type=' + controller.type + ']', {
-          oninput: m.withAttr('value', controller.prop),
-          onkeydown: function(e) {
-            if (e.keyCode === 13) {
-              this.blur();
-            }
-          },
-          onfocus: function() {
-            this.select();
-          },
-          onblur: function() {
-            controller.confirm();
-          },
-          onmouseup: function() {
-            // Prevent deselect on focus
-            return false;
-          },
-          value: controller.prop()
-        });
-      }
+          else {
+            ctx.val = value;
+            el.value = value();
+          }
+        },
+        onkeydown: function(e) {
+          if (e.keyCode === 13) {
+            this.blur();
+          }
+        },
+        onfocus: function() {
+          this.select();
+        },
+        onblur: function() {
+          changeHandler && changeHandler(this.value);
+        },
+        onmouseup: function() {
+          // Prevent deselect on focus
+          return false;
+        }
+      });
     };
 
     // Start app
