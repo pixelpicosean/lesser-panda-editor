@@ -1,0 +1,172 @@
+{"frames": {
+
+"bar.png":
+{
+	"frame": {"x":770,"y":1300,"w":132,"h":580},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":132,"h":580},
+	"sourceSize": {"w":132,"h":580}
+},
+"bushes.png":
+{
+	"frame": {"x":0,"y":402,"w":768,"h":224},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":768,"h":224},
+	"sourceSize": {"w":768,"h":224}
+},
+"cloud1.png":
+{
+	"frame": {"x":492,"y":0,"w":108,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":108,"h":68},
+	"sourceSize": {"w":108,"h":68}
+},
+"cloud2.png":
+{
+	"frame": {"x":234,"y":86,"w":140,"h":96},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":140,"h":96},
+	"sourceSize": {"w":140,"h":96}
+},
+"cloud3.png":
+{
+	"frame": {"x":708,"y":0,"w":132,"h":80},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":132,"h":80},
+	"sourceSize": {"w":132,"h":80}
+},
+"cloud4.png":
+{
+	"frame": {"x":602,"y":0,"w":104,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":104,"h":68},
+	"sourceSize": {"w":104,"h":68}
+},
+"gameover.png":
+{
+	"frame": {"x":770,"y":628,"w":568,"h":304},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":568,"h":304},
+	"sourceSize": {"w":568,"h":304}
+},
+"ground.png":
+{
+	"frame": {"x":0,"y":628,"w":768,"h":272},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":768,"h":272},
+	"sourceSize": {"w":768,"h":272}
+},
+"logo1.png":
+{
+	"frame": {"x":650,"y":86,"w":512,"h":132},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":512,"h":132},
+	"sourceSize": {"w":512,"h":132}
+},
+"logo2.png":
+{
+	"frame": {"x":376,"y":86,"w":272,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":272,"h":108},
+	"sourceSize": {"w":272,"h":108}
+},
+"madewithpanda.png":
+{
+	"frame": {"x":20,"y":0,"w":392,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":392,"h":24},
+	"sourceSize": {"w":392,"h":24}
+},
+"new.png":
+{
+	"frame": {"x":414,"y":0,"w":76,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":76,"h":40},
+	"sourceSize": {"w":76,"h":40}
+},
+"parallax1.png":
+{
+	"frame": {"x":0,"y":1300,"w":768,"h":376},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":768,"h":376},
+	"sourceSize": {"w":768,"h":376}
+},
+"parallax2.png":
+{
+	"frame": {"x":0,"y":934,"w":768,"h":364},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":768,"h":364},
+	"sourceSize": {"w":768,"h":364}
+},
+"parallax3.png":
+{
+	"frame": {"x":0,"y":220,"w":768,"h":180},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":768,"h":180},
+	"sourceSize": {"w":768,"h":180}
+},
+"particle.png":
+{
+	"frame": {"x":6,"y":0,"w":12,"h":12},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":12,"h":12},
+	"sourceSize": {"w":12,"h":12}
+},
+"particle2.png":
+{
+	"frame": {"x":0,"y":0,"w":4,"h":4},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":4,"h":4},
+	"sourceSize": {"w":4,"h":4}
+},
+"player1.png":
+{
+	"frame": {"x":980,"y":0,"w":136,"h":84},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":136,"h":84},
+	"sourceSize": {"w":136,"h":84}
+},
+"player2.png":
+{
+	"frame": {"x":842,"y":0,"w":136,"h":84},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":136,"h":84},
+	"sourceSize": {"w":136,"h":84}
+},
+"restart.png":
+{
+	"frame": {"x":0,"y":86,"w":232,"h":88},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":232,"h":88},
+	"sourceSize": {"w":232,"h":88}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "sprites.png",
+	"format": "RGBA8888",
+	"size": {"w":1340,"h":1880},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:5c73cd163a79591dd5bec04bb5200434:1/1$"
+}
+}
