@@ -11,8 +11,14 @@ var uglify = require('gulp-uglify');
 var sass = require('gulp-sass');
 var browserSync = require('browser-sync').create();
 
-gulp.task('script', function() {
-  return browserify('app.js', { basedir: './src/app', paths: ['../vendor'], debug: true })
+gulp.task('vendor', function() {
+  return gulp.src('./src/vendor/**/*.js')
+    .pipe(concat('vendor.js'))
+    .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('script', ['vendor'], function() {
+  return browserify('app.js', { basedir: './src/app', debug: true })
     .transform(babelify)
     .bundle()
     .on('error', gutil.log)

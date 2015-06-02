@@ -1,5 +1,6 @@
 import flyd from 'flyd';
 import m from 'mithril';
+import PIXI from 'pixi';
 
 export default {
   controller: function(args) {
