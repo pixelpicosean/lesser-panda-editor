@@ -13,11 +13,14 @@ var browserSync = require('browser-sync').create();
 
 gulp.task('vendor', function() {
   return gulp.src('./src/vendor/**/*.js')
-    .pipe(concat('vendor.js'))
+    .pipe(sourcemaps.init({ loadMaps: true }))
+      .pipe(concat('vendor.js'))
+      .pipe(uglify())
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('script', ['vendor'], function() {
+gulp.task('script', function() {
   return browserify('app.js', { basedir: './src/app', debug: true })
     .transform(babelify)
     .bundle()
@@ -49,7 +52,7 @@ gulp.task('html', function() {
     .pipe(browserSync.stream());
 });
 
-gulp.task('build', ['script', 'style', 'html']);
+gulp.task('build', ['vendor', 'script', 'style', 'html']);
 
 gulp.task('clean', function (done) {
   del(['dist'], done);
@@ -65,7 +68,7 @@ gulp.task('server', function() {
   browserSync.init({
     port: 4200,
     server: {
-      baseDir: 'dist'
+      baseDir: ['dist', 'public']
     },
     ghostMode: false,
     notify: false
