@@ -18,17 +18,17 @@ export default {
         controller.context = element.getContext('2d');
 
         // Setup event stream and handlers
-        let whenToResize = flyd.stream();
-        window.addEventListener('resize', whenToResize);
+        let viewSizeChanged = flyd.stream();
+        window.addEventListener('resize', viewSizeChanged);
 
-        let whenToDraw = flyd.merge(whenToResize, args.whenModelChanged);
+        let whenToDraw = flyd.merge(viewSizeChanged, args.actorAttrChanged);
 
-        flyd.map(controller.resize, whenToResize);
+        flyd.map(controller.resize, viewSizeChanged);
         flyd.map(controller.draw, whenToDraw);
 
         // Unload behavior
         controller.onunload = function() {
-          window.removeEventListener('resize', whenToResize);
+          window.removeEventListener('resize', viewSizeChanged);
         };
 
         // Resize canvas and draw the first time

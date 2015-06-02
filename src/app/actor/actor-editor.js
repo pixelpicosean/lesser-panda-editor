@@ -12,40 +12,67 @@ const attr = flyd.stream;
 
 export default {
   controller: function() {
+    let c = {
+      // = Attributes =====================================
+
+      root: attr(),
+      selected: attr(),
+
+      // = Actions ========================================
+
+      /**
+       * Actor attributes changed events.
+       * @type {flyd.stream}
+       */
+      actorAttrChanged: flyd.stream()
+    };
+
     // Setup model
-    this.root = attr(new Actor('World', 20, 40));
+    // TODO: Pass model from "route" to this controller
+    c.root(new Actor('World', 20, 40));
 
-    let bgLayer = attr(),
-      entLayer = attr(),
-      uiLayer = attr();
+    let bgLayer = new Actor('bgLayer', 20, 80),
+      entLayer = new Actor('entLayer', 20, 200),
+      uiLayer = new Actor('uiLayer', 600, 40);
 
-    this.root().addChild(bgLayer(new Actor('bgLayer', 20, 80))());
-    bgLayer().addChild(new Actor('Parallel', 20, 120));
-    bgLayer().addChild(new Actor('Ground', 20, 160));
+    c.root().addChild(bgLayer);
+    bgLayer.addChild(new Actor('Parallel', 20, 120));
+    bgLayer.addChild(new Actor('Ground', 20, 160));
 
-    this.root().addChild(entLayer(new Actor('entLayer', 20, 200))());
-    entLayer().addChild(new Actor('Mario', 20, 240));
+    c.root().addChild(entLayer);
+    entLayer.addChild(new Actor('Mario', 20, 240));
     for (let i = 0; i < 20; i++) {
-      entLayer().addChild(new Sprite('Coin_' + i, 200, 40 * (i + 1)));
+      entLayer.addChild(new Sprite('Coin_' + i, 200, 40 * (i + 1)));
     }
     for (let i = 0; i < 20; i++) {
-      entLayer().addChild(new Sprite('Coin_' + (i + 20), 400, 40 * (i + 1)));
+      entLayer.addChild(new Sprite('Coin_' + (i + 20), 400, 40 * (i + 1)));
     }
 
-    this.root().addChild(uiLayer(new Actor('uiLayer', 600, 40))());
-    uiLayer().addChild(new Sprite('HUD', 600, 80));
+    c.root().addChild(uiLayer);
+    uiLayer.addChild(new Sprite('HUD', 600, 80));
 
     // Select the root by default
-    this.selected = attr(this.root());
+    c.selected(c.root());
 
-    // Setup streams
-    this.whenModelChanged = flyd.stream();
+    return c;
   },
   view: function(controller) {
     return [
-      m.component(ActorOutliner, { actor: controller.root, selected: controller.selected, whenModelChanged: controller.whenModelChanged }),
-      m.component(ActorViewport, { actor: controller.root, selected: controller.selected, whenModelChanged: controller.whenModelChanged }),
-      m.component(ActorInspector, { actor: controller.selected, whenModelChanged: controller.whenModelChanged })
+      m.component(ActorOutliner, {
+        actor: controller.root,
+        selected: controller.selected,
+        actorAttrChanged: controller.actorAttrChanged
+      }),
+      m.component(ActorViewport, {
+        actor: controller.root,
+        selected: controller.selected,
+        actorAttrChanged: controller.actorAttrChanged
+      }),
+      m.component(ActorInspector, {
+        actor: controller.root,
+        selected: controller.selected,
+        actorAttrChanged: controller.actorAttrChanged
+      })
     ];
   }
 };
