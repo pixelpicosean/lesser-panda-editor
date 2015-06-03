@@ -5,6 +5,8 @@ const attr = flyd.stream;
 var Actor = function(name = 'Untitled', x = 0, y = 0) {
   this.id = Actor.uid++;
 
+  this.nodeType = 'Actor';
+
   this.name = attr(name);
   this.position = {
     x: attr(x),

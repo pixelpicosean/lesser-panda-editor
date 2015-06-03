@@ -7,6 +7,8 @@ const attr = flyd.stream;
 var Sprite = function(name, x, y, texture = '') {
   Actor.call(this, name, x, y);
 
+  this.nodeType = 'Sprite';
+
   this.anchor = {
     x: attr(0),
     y: attr(0)
