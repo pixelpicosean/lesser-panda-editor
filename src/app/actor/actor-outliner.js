@@ -24,6 +24,7 @@ export default {
     return c;
   },
   view: function(controller) {
+    // console.log('[Outliner] view');
     return m('aside.sidebar.left.shadow', [
       m('header.header', 'Outliner'),
       m('ul.content.tree.y-overflow', [

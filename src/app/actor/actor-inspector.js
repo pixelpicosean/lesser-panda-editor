@@ -35,6 +35,7 @@ export default {
     return c;
   },
   view: function(controller) {
+    // console.log('[Inspector] view');
     return m('aside.sidebar.right.shadow', [
       m('header.header', 'Inspector'),
       m('div.content.y-overflow', [

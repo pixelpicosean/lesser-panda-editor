@@ -138,6 +138,7 @@ export default {
         // Setup event stream and handlers
         let viewSizeChanged = flyd.stream();
         window.addEventListener('resize', viewSizeChanged);
+        controller.$.addEventListener('mousemove', controller.mouseMove);
 
         flyd.map(controller.actorAttrChanged, args.actorAttrChanged);
         flyd.map(controller.resize, viewSizeChanged);
@@ -159,7 +160,7 @@ export default {
           return false;
         });
         Mousetrap.bind('g', function() {
-          // controller.enterTranslateMode();
+          controller.enterTranslateMode();
         });
         Mousetrap.bind('r', function() {
           // controller.enterRotateMode();
@@ -168,15 +169,17 @@ export default {
           // controller.enterScaleMode();
         });
         Mousetrap.bind('enter', function() {
-          // controller.confirmModifyChanges();
+          controller.confirmModifyChanges();
         });
         Mousetrap.bind('esc', function() {
-          // controller.resetModifyChanges();
+          controller.resetModifyChanges();
         });
 
         // Unload behavior
         controller.onunload = function() {
           window.removeEventListener('resize', viewSizeChanged);
+          controller.$.removeEventListener('mousemove', controller.mouseMove);
+
           Mousetrap.reset();
         };
 
@@ -211,9 +214,35 @@ export default {
         controller.emptyArea.endFill();
       },
 
+      mouseMove: function(e) {
+        // Track mouse position over this component
+        controller.currMousePos.x = e.pageX;
+        controller.currMousePos.y = e.pageY;
+
+        // Update modifying mode
+        switch (controller.currModifyMode) {
+          case MODES.TRANSLATE:
+            controller.updateTranslateMode(e.pageX, e.pageY);
+            break;
+          case MODES.ROTATE:
+            controller.updateRotateMode(e.pageX, e.pageY);
+            break;
+          case MODES.SCALE:
+            controller.updateScaleMode(e.pageX, e.pageY);
+            break;
+        }
+      },
+
       actorAttrChanged: function(actor) {
         if (controller.instModelHash[actor.id]) {
           controller.syncInstOf(actor);
+        }
+      },
+      actorDeleted: function(actor) {
+        var pair = controller.instModelHash[actor.id];
+        if (pair) {
+          // Remove instance of this actor from stage
+          pair.inst.parent.removeChild(pair.inst);
         }
       },
       actorSelected: function(actor) {
@@ -236,6 +265,156 @@ export default {
 
         m.endComputation();
       },
+
+      // = Modifying Modes Begin ==========================
+
+      enterTranslateMode: function() {
+        if (!controller.selected() || controller.currModifyMode === MODES.TRANSLATE) {
+          return;
+        }
+        // Reset if switch from other modifying modes
+        if (controller.currModifyMode !== MODES.NORMAL) {
+          controller.resetModifyChanges();
+        }
+
+        // Remove selection rectangle
+        controller.removeSelectionRect();
+
+        // Track required properties
+        controller.mousePosBeforeModify.x = controller.currMousePos.x;
+        controller.mousePosBeforeModify.y = controller.currMousePos.y;
+
+        controller.actorPosBeforeModify.x = controller.selected().position.x();
+        controller.actorPosBeforeModify.y = controller.selected().position.y();
+
+        // Change mode flag
+        controller.currModifyMode = MODES.TRANSLATE;
+      },
+      updateTranslateMode: function(mouseX, mouseY) {
+        var pair = controller.instModelHash[controller.selected().id];
+        if (pair) {
+          pair.inst.position.set(
+            controller.actorPosBeforeModify.x + (mouseX - (controller.mousePosBeforeModify.x)),
+            controller.actorPosBeforeModify.y + (mouseY - (controller.mousePosBeforeModify.y))
+          );
+        }
+      },
+
+      enterRotateMode: function() {
+        if (!controller.selected() || controller.currModifyMode === MODES.ROTATE) {
+          return;
+        }
+        // Reset if switch from other modifying modes
+        if (controller.currModifyMode !== MODES.NORMAL) {
+          controller.resetModifyChanges();
+        }
+
+        // Remove selection rectangle
+        controller.removeSelectionRect();
+
+        // Track required properties
+        controller.mouseToActorAngleBeforeModify = Math.atan2(
+          controller.currMousePos.y - controller.selected().position.y(),
+          controller.currMousePos.x - controller.selected().position.x()
+        );
+        controller.actorRotationBeforeModify = controller.selected().rotation();
+
+        // Change mode flag
+        controller.currModifyMode = MODES.ROTATE;
+      },
+      updateRotateMode: function(mouseX, mouseY) {
+        var mouseToActorAngle = Math.atan2(
+          mouseY - controller.selected().position.y(),
+          mouseX - controller.selected().position.x()
+        );
+        var pair = controller.instModelHash[controller.selected().id];
+        if (pair) {
+          pair.inst.rotation = controller.actorRotationBeforeModify + (mouseToActorAngle - controller.mouseToActorAngleBeforeModify);
+        }
+      },
+
+      enterScaleMode: function() {
+        if (!controller.selected() || controller.currModifyMode === MODES.SCALE) {
+          return;
+        }
+        // Reset if switch from other modifying modes
+        if (controller.currModifyMode !== MODES.NORMAL) {
+          controller.resetModifyChanges();
+        }
+
+        // Remove selection rectangle
+        controller.removeSelectionRect();
+
+        // Track required properties
+        var x = controller.selected().position.x(),
+          y = controller.selected().position.y();
+        controller.mouseToActorDistBeforeModify = Math.sqrt(
+          (controller.currMousePos.x - x) * (controller.currMousePos.x - x) +
+          (controller.currMousePos.y - y) * (controller.currMousePos.y - y)
+        );
+
+        controller.currModifyMode = MODES.SCALE;
+      },
+      updateScaleMode: function(mouseX, mouseY) {
+        var x = controller.selected().position.x(),
+          y = controller.selected().position.y();
+        var dist = Math.sqrt(
+          (mouseX - x) * (mouseX - x) +
+          (mouseY - y) * (mouseY - y)
+        );
+
+        var scaleFactor = dist / controller.mouseToActorDistBeforeModify;
+        var pair = controller.instModelHash[controller.selected().id];
+        if (pair) {
+          pair.inst.scale.set(
+            controller.selected().scale.x() * scaleFactor,
+            controller.selected().scale.y() * scaleFactor
+          );
+        }
+      },
+
+      confirmModifyChanges: function() {
+        // m.startComputation();
+
+        if (!controller.selected() || controller.currModifyMode === MODES.NORMAL) {
+          return;
+        }
+
+        var pair = controller.instModelHash[controller.selected().id];
+        switch (controller.currModifyMode) {
+          case MODES.TRANSLATE:
+            controller.selected().position.x(pair.inst.position.x);
+            controller.selected().position.y(pair.inst.position.y);
+            controller.drawRectForActorInstance(pair.inst);
+            break;
+          case MODES.ROTATE:
+            // controller.selected().rotation(pair.inst.rotation);
+            controller.drawRectForActorInstance(pair.inst);
+            break;
+          case MODES.SCALE:
+            // controller.selected().scale.x(pair.inst.scale.x);
+            // controller.selected().scale.y(pair.inst.scale.y);
+            controller.drawRectForActorInstance(pair.inst);
+            break;
+        }
+
+        controller.currModifyMode = MODES.NORMAL;
+
+        // m.endComputation();
+      },
+      resetModifyChanges: function() {
+        if (!controller.selected() || controller.currModifyMode === MODES.NORMAL) {
+          return;
+        }
+
+        // Re-sync instance back with model
+        controller.syncInstOf(controller.selected());
+
+        // Reset mode flag
+        controller.currModifyMode = MODES.NORMAL;
+      },
+
+      // = Modifying Modes End ============================
 
       // = UI =============================================
 
