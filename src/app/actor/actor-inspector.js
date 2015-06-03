@@ -10,6 +10,7 @@ export default {
       selected: args.selected,
 
       selectedIsNotRoot: function() {
+        // console.log('selectedIsNotRoot: %s', (c.actor().id !== c.selected().id ? 'true' : 'false'));
         return c.actor().id !== c.selected().id;
       },
 

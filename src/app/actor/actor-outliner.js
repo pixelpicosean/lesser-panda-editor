@@ -28,7 +28,7 @@ export default {
       m('header.header', 'Outliner'),
       m('ul.content.tree.y-overflow', [
         m('li', [
-          m('div.leaf' + (controller.isSelected(controller.actor()) ? '.selected' : ''), { onmousedown: controller.selectChild.bind(controller, controller.actor) }, [
+          m('div.leaf' + (controller.isSelected(controller.actor()) ? '.selected' : ''), { onmousedown: controller.selectChild.bind(controller, controller.actor()) }, [
             m('label', controller.actor().name()),
           ]),
           m('ul.list', controller.actor().children.map(function childTreeMap(actor) {

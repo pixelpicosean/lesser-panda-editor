@@ -36,20 +36,22 @@ export default {
       uiLayer = new Actor('uiLayer', 600, 40);
 
     c.root().addChild(bgLayer);
-    bgLayer.addChild(new Actor('Parallel', 20, 120));
-    bgLayer.addChild(new Actor('Ground', 20, 160));
+    bgLayer.addChild(new Sprite('Parallax1', 0, 400, 'parallax1.png'));
+    bgLayer.addChild(new Sprite('Parallax2', 0, 550, 'parallax2.png'));
+    bgLayer.addChild(new Sprite('Parallax3', 0, 650, 'parallax3.png'));
+    bgLayer.addChild(new Sprite('cloud1', 100, 100, 'cloud1.png'));
+    bgLayer.addChild(new Sprite('cloud2', 300, 50, 'cloud2.png'));
+    bgLayer.addChild(new Sprite('LogoFlying', 100, 40, 'logo1.png'));
+    bgLayer.addChild(new Sprite('LogoDog', 200, 180, 'logo2.png'));
+    bgLayer.addChild(new Sprite('cloud3', 680, 100, 'cloud3.png'));
+    bgLayer.addChild(new Sprite('cloud4', 700, 200, 'cloud4.png'));
+    bgLayer.addChild(new Sprite('bushes', 0, 700, 'bushes.png'));
+    bgLayer.addChild(new Sprite('ground', 0, 800, 'ground.png'));
 
     c.root().addChild(entLayer);
-    entLayer.addChild(new Actor('Mario', 20, 240));
-    for (let i = 0; i < 20; i++) {
-      entLayer.addChild(new Sprite('Coin_' + i, 200, 40 * (i + 1)));
-    }
-    for (let i = 0; i < 20; i++) {
-      entLayer.addChild(new Sprite('Coin_' + (i + 20), 400, 40 * (i + 1)));
-    }
+    entLayer.addChild(new Sprite('player1', 100, 500, 'player1.png'));
 
     c.root().addChild(uiLayer);
-    uiLayer.addChild(new Sprite('HUD', 600, 80));
 
     // Select the root by default
     c.selected(c.root());
