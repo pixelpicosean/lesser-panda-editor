@@ -39,6 +39,7 @@
    "browserify-shim": {
      "mithril": "global:m",
      "flyd": "global:flyd",
-     "pixi": "global:PIXI"
+     "pixi": "global:PIXI",
+     "mousetrap": "global:Mousetrap"
    }
 }
