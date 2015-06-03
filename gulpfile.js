@@ -15,7 +15,6 @@ gulp.task('vendor', function() {
   return gulp.src('./src/vendor/**/*.js')
     .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(concat('vendor.js'))
-      .pipe(uglify())
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('./dist'));
 });
