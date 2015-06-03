@@ -8,6 +8,7 @@ export default {
 
       actor: args.actor,
       selected: args.selected,
+      actorAttrChanged: args.actorAttrChanged,
 
       selectedIsNotRoot: function() {
         // console.log('selectedIsNotRoot: %s', (c.actor().id !== c.selected().id ? 'true' : 'false'));
@@ -16,10 +17,19 @@ export default {
 
       // = Actions ========================================
 
-      nameChanged: function(name) { c.selected().name(name); args.actorAttrChanged(c.selected()); },
+      nameChanged: function(name) {
+        c.selected().name(name);
+        c.actorAttrChanged(c.selected());
+      },
 
-      posXChanged: function(x) { c.selected().position.x(x); args.actorAttrChanged(c.selected()); },
-      posYChanged: function(y) { c.selected().position.y(y); args.actorAttrChanged(c.selected()); }
+      posXChanged: function(x) {
+        c.selected().position.x(x);
+        c.actorAttrChanged(c.selected());
+      },
+      posYChanged: function(y) {
+        c.selected().position.y(y);
+        c.actorAttrChanged(c.selected());
+      }
     };
 
     return c;

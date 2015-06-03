@@ -1,6 +1,7 @@
 import flyd from 'flyd';
 import m from 'mithril';
 import PIXI from 'pixi';
+import Mousetrap from 'mousetrap';
 
 const MODES = {
   NORMAL: 0,
@@ -12,6 +13,9 @@ const MODES = {
 export default {
   controller: function(args) {
     let controller = {
+
+      // = Attributes =====================================
+
       renderer: null,
       stage: null,
       root: null,
@@ -30,6 +34,53 @@ export default {
       selected: args.selected,
 
       currModifyMode: MODES.NORMAL,
+
+      /**
+       * Mouse position before enter modifying mode
+       * @type {Object}
+       */
+      mousePosBeforeModify: {
+        x: 0, y: 0
+      },
+      /**
+       * Current mouse position in browser window
+       * @type {Object}
+       */
+      currMousePos: {
+        x: 0, y: 0
+      },
+      /**
+       * Rotation of vector from cursor to actor
+       * @type {Number}
+       */
+      mouseToActorAngleBeforeModify: 0,
+      /**
+       * Distance between cursor and actor before modify
+       * @type {Number}
+       */
+      mouseToActorDistBeforeModify: 0,
+
+      /**
+       * Position of selected actor before enter modifying mode
+       * @type {Object}
+       */
+      actorPosBeforeModify: {
+        x: 0, y: 0
+      },
+      /**
+       * Rotation of selected actor before enter modifying mode
+       * @type {Number}
+       */
+      actorRotationBeforeModify: 0,
+      /**
+       * Scale of selected actor before enter modifying mode
+       * @type {Object}
+       */
+      actorScaleBeforeModify: {
+        x: 0, y: 0
+      },
+
+      // = Config =========================================
 
       config: function(element, isInitialized, ctx) {
         if (isInitialized) return;
@@ -88,14 +139,45 @@ export default {
         let viewSizeChanged = flyd.stream();
         window.addEventListener('resize', viewSizeChanged);
 
-        let whenToDraw = flyd.merge(viewSizeChanged, args.actorAttrChanged);
-
+        flyd.map(controller.actorAttrChanged, args.actorAttrChanged);
         flyd.map(controller.resize, viewSizeChanged);
-        flyd.map(controller.draw, whenToDraw);
+
+        // Setup shortcuts
+        Mousetrap.bind('command+d', function() {
+          // Reset and deselect
+          if (controller.currModifyMode !== MODES.NORMAL) {
+            controller.resetModifyChanges();
+          }
+
+          // Reset to root
+          m.startComputation();
+          controller.selected(controller.actor());
+          controller.removeSelectionRect();
+          m.endComputation();
+
+          // Prevents the default action
+          return false;
+        });
+        Mousetrap.bind('g', function() {
+          // controller.enterTranslateMode();
+        });
+        Mousetrap.bind('r', function() {
+          // controller.enterRotateMode();
+        });
+        Mousetrap.bind('s', function() {
+          // controller.enterScaleMode();
+        });
+        Mousetrap.bind('enter', function() {
+          // controller.confirmModifyChanges();
+        });
+        Mousetrap.bind('esc', function() {
+          // controller.resetModifyChanges();
+        });
 
         // Unload behavior
         controller.onunload = function() {
           window.removeEventListener('resize', viewSizeChanged);
+          Mousetrap.reset();
         };
 
         // Resize canvas
@@ -129,6 +211,11 @@ export default {
         controller.emptyArea.endFill();
       },
 
+      actorAttrChanged: function(actor) {
+        if (controller.instModelHash[actor.id]) {
+          controller.syncInstOf(actor);
+        }
+      },
       actorSelected: function(actor) {
         controller.selected(actor);
         let pair = controller.instModelHash[actor.id];
@@ -287,7 +374,7 @@ export default {
               break;
             case 'Sprite':
               this.syncSpriteInst(actor, pair.inst);
-              // this.drawRectForActorInstance(pair.inst);
+              this.drawRectForActorInstance(pair.inst);
               break;
             case 'TilingSprite':
               // this.syncTilingSpriteInst(actor, pair.inst);
