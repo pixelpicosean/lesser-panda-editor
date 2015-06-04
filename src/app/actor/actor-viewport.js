@@ -97,20 +97,16 @@ export default {
 
         // Let stage listen to "click nothing" event
         controller.emptyArea.interactive = true;
-        controller.emptyArea.click = function() {
-          m.startComputation();
-
+        controller.emptyArea.mousedown = function() {
           // Deselect in normal mode
           if (controller.currModifyMode === MODES.NORMAL) {
-            // console.log('select root');
+            m.startComputation();
+
             controller.selected(controller.actor());
             controller.removeSelectionRect();
-          }
-          else {
-            controller.confirmModifyChanges();
-          }
 
-          m.endComputation();
+            m.endComputation();
+          }
         };
 
         controller.root = new PIXI.DisplayObjectContainer();
@@ -136,12 +132,12 @@ export default {
         };
 
         // Setup event stream and handlers
-        let viewSizeChanged = flyd.stream();
-        window.addEventListener('resize', viewSizeChanged);
+        window.addEventListener('resize', controller.resize);
         controller.$.addEventListener('mousemove', controller.mouseMove);
+        controller.$.addEventListener('mousedown', controller.mouseDown);
 
-        flyd.map(controller.actorAttrChanged, args.actorAttrChanged);
-        flyd.map(controller.resize, viewSizeChanged);
+        args.actorAttrChanged.map(controller.actorAttrChanged);
+        controller.selected.map(controller.drawRectForActor);
 
         // Setup shortcuts
         Mousetrap.bind('command+d', function() {
@@ -152,8 +148,10 @@ export default {
 
           // Reset to root
           m.startComputation();
+
           controller.selected(controller.actor());
           controller.removeSelectionRect();
+
           m.endComputation();
 
           // Prevents the default action
@@ -177,8 +175,9 @@ export default {
 
         // Unload behavior
         controller.onunload = function() {
-          window.removeEventListener('resize', viewSizeChanged);
+          window.removeEventListener('resize', controller.resize);
           controller.$.removeEventListener('mousemove', controller.mouseMove);
+          controller.$.removeEventListener('mousedown', controller.mouseDown);
 
           Mousetrap.reset();
         };
@@ -232,6 +231,11 @@ export default {
             break;
         }
       },
+      mouseDown: function() {
+        if (controller.currModifyMode !== MODES.NORMAL) {
+          controller.confirmModifyChanges();
+        }
+      },
 
       actorAttrChanged: function(actor) {
         if (controller.instModelHash[actor.id]) {
@@ -239,37 +243,41 @@ export default {
         }
       },
       actorDeleted: function(actor) {
+        m.startComputation();
+
         var pair = controller.instModelHash[actor.id];
         if (pair) {
           // Remove instance of this actor from stage
           pair.inst.parent.removeChild(pair.inst);
         }
+
+        m.endComputation();
       },
       actorSelected: function(actor) {
-        controller.selected(actor);
-        let pair = controller.instModelHash[actor.id];
-        if (pair) {
-          controller.drawRectForActorInstance(pair.inst);
+        // Already selected?
+        if (controller.selected() && controller.selected().id === actor.id) {
+          return;
         }
-      },
-      actorClicked: function(actor) {
+
         m.startComputation();
 
+        // console.log('[Viewport] controller.selected changed');
+
+        controller.selected(actor);
+
+        m.endComputation();
+      },
+      actorClicked: function(actor) {
         if (controller.currModifyMode === MODES.NORMAL) {
           controller.actorSelected(actor);
           // console.log('click to select: %s', controller.selected().name());
         }
-        else {
-          controller.confirmModifyChanges();
-        }
-
-        m.endComputation();
       },
 
       // = Modifying Modes Begin ==========================
 
       enterTranslateMode: function() {
-        if (!controller.selected() || controller.currModifyMode === MODES.TRANSLATE) {
+        if (!controller.selected() || (controller.selected().id === controller.actor().id) || controller.currModifyMode === MODES.TRANSLATE) {
           return;
         }
         // Reset if switch from other modifying modes
@@ -374,11 +382,12 @@ export default {
       },
 
       confirmModifyChanges: function() {
-        // m.startComputation();
-
         if (!controller.selected() || controller.currModifyMode === MODES.NORMAL) {
           return;
         }
+
+        m.startComputation();
+        console.log('confirmModifyChanges');
 
         var pair = controller.instModelHash[controller.selected().id];
         switch (controller.currModifyMode) {
@@ -398,9 +407,11 @@ export default {
             break;
         }
 
-        controller.currModifyMode = MODES.NORMAL;
+        // console.log(`controller.selected().position: ${controller.selected().position.x()}, ${controller.selected().position.y()}`);
 
-        // m.endComputation();
+        m.endComputation();
+
+        controller.currModifyMode = MODES.NORMAL;
       },
       resetModifyChanges: function() {
         if (!controller.selected() || controller.currModifyMode === MODES.NORMAL) {
@@ -418,12 +429,20 @@ export default {
 
       // = UI =============================================
 
+      drawRectForActor: function(actor) {
+        let pair = controller.instModelHash[actor.id];
+        if (pair) {
+          controller.drawRectForActorInstance(pair.inst);
+        }
+      },
       drawRectForActorInstance: function(inst) {
-        let origin = controller.root.position;
-        let pos = inst.toGlobal(origin);
+        const origin = controller.root.position;
+        const pos = inst.toGlobal(origin);
 
-        let left = -inst.width * inst.anchor.x,
-          top = -inst.height * inst.anchor.y,
+        const anchor = inst.anchor || { x: 0, y: 0 };
+
+        const left = -inst.width * anchor.x,
+          top = -inst.height * anchor.y,
           width = inst.width,
           height = inst.height;
 
@@ -519,9 +538,8 @@ export default {
         let tex = PIXI.Texture.fromImage(actor.texture());
         let inst = new PIXI.Sprite(tex);
         inst.interactive = true;
-        inst.click = function() {
+        inst.mousedown = function() {
           controller.actorClicked(actor, inst);
-          // console.log('select: %s', actor.name());
         };
 
         // Save actor-instance pair to hash for later use
@@ -584,6 +602,7 @@ export default {
     return controller;
   },
   view: function(controller) {
+    // console.log('[Viewport] view');
     return m('canvas#viewport.max-size', { config: controller.config });
   }
 };
