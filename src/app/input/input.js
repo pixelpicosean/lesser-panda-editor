@@ -1,14 +1,11 @@
 import m from 'mithril';
 
-export default function(type, value, changeHandler) {
+export default function(type, args) {
   return m('input[type=' + type + ']', {
     config: function(el, init, ctx) {
-      if (ctx.val && ctx.val === value) {
-        return;
-      }
-      else {
-        ctx.val = value;
-        el.value = value();
+      // Data down
+      if (ctx.oldValue !== args.value) {
+        el.value = ctx.oldValue = args.value;
       }
     },
     onkeydown: function(e) {
@@ -20,7 +17,8 @@ export default function(type, value, changeHandler) {
       this.select();
     },
     onblur: function() {
-      changeHandler && changeHandler(this.value);
+      // Action up
+      args.onchange && args.onchange(this.value);
     },
     onmouseup: function() {
       // Prevent deselect on focus
