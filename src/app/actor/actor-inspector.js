@@ -1,5 +1,5 @@
 import m from 'mithril';
-import input from '../input/input';
+import Input from '../input/input';
 
 export default {
   controller: function(args) {
@@ -43,15 +43,15 @@ export default {
         m('h2', 'GENERAL'),
         m('div.property-edit', [
           m('label', 'Name'),
-          input('text', controller.selected().name, controller.nameChanged)
+          m.component(Input, { value: controller.selected().name(), onchange: controller.nameChanged })
         ]),
 
         // Only non-root actors have these attributes
         controller.selectedIsNotRoot() ?
           m('div.property-edit', [
             m('label', 'Position'),
-            input('number', controller.selected().position.x, controller.posXChanged),
-            input('number', controller.selected().position.y, controller.posYChanged)
+            m.component(Input, { type: 'number', value: controller.selected().position.x(), onchange: controller.posXChanged }),
+            m.component(Input, { type: 'number', value: controller.selected().position.y(), onchange: controller.posYChanged })
           ]) :
           ''
       ])
