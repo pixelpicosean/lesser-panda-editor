@@ -9,6 +9,12 @@ var Sprite = function(name, x, y, texture = '') {
 
   this.nodeType = 'Sprite';
 
+  this.rotation = attr(0);
+  this.scale = {
+    x: attr(1),
+    y: attr(1)
+  };
+  this.alpha = attr(1);
   this.anchor = {
     x: attr(0),
     y: attr(0)
