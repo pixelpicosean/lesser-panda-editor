@@ -1,4 +1,4 @@
-import flyd from 'flyd';
+import attr from '../util/kefir-variable';
 import m from 'mithril';
 
 import Actor from './actor';
@@ -7,8 +7,6 @@ import Sprite from '../sprite/sprite';
 import ActorOutliner from './actor-outliner';
 import ActorViewport from './actor-viewport';
 import ActorInspector from './actor-inspector';
-
-const attr = flyd.stream;
 
 export default {
   controller: function() {
@@ -22,9 +20,9 @@ export default {
 
       /**
        * Actor attributes changed events.
-       * @type {flyd.stream}
+       * @type {kefir-variable}
        */
-      actorAttrChanged: flyd.stream()
+      actorAttrChanged: attr()
     };
 
     // Setup model

@@ -1,6 +1,4 @@
-import flyd from 'flyd';
-
-const attr = flyd.stream;
+import attr from '../util/kefir-variable';
 
 var Actor = function(name = 'Untitled', x = 0, y = 0) {
   this.id = Actor.uid++;

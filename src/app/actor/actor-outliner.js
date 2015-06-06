@@ -1,4 +1,3 @@
-import flyd from 'flyd';
 import m from 'mithril';
 
 export default {

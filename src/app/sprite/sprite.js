@@ -1,8 +1,6 @@
-import flyd from 'flyd';
+import attr from '../util/kefir-variable';
 
 import Actor from '../actor/actor';
-
-const attr = flyd.stream;
 
 var Sprite = function(name, x, y, texture = '') {
   Actor.call(this, name, x, y);

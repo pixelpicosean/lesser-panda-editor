@@ -38,7 +38,7 @@
    },
    "browserify-shim": {
      "mithril": "global:m",
-     "flyd": "global:flyd",
+     "kefir": "global:Kefir",
      "pixi": "global:PIXI",
      "mousetrap": "global:Mousetrap"
    }

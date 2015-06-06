@@ -1,4 +1,3 @@
-import flyd from 'flyd';
 import m from 'mithril';
 import PIXI from 'pixi';
 import Mousetrap from 'mousetrap';
@@ -136,8 +135,8 @@ export default {
         controller.$.addEventListener('mousemove', controller.mouseMove);
         controller.$.addEventListener('mousedown', controller.mouseDown);
 
-        args.actorAttrChanged.map(controller.actorAttrChanged);
-        controller.selected.map(controller.drawRectForActor);
+        args.actorAttrChanged.onValue(controller.actorAttrChanged);
+        controller.selected.onValue(controller.drawRectForActor);
 
         // Setup shortcuts
         Mousetrap.bind('command+d', function() {
@@ -178,6 +177,9 @@ export default {
           window.removeEventListener('resize', controller.resize);
           controller.$.removeEventListener('mousemove', controller.mouseMove);
           controller.$.removeEventListener('mousedown', controller.mouseDown);
+
+          args.actorAttrChanged.offValue(controller.actorAttrChanged);
+          controller.selected.offValue(controller.drawRectForActor);
 
           Mousetrap.reset();
         };
