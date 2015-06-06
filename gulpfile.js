@@ -19,11 +19,14 @@ gulp.task('vendor', function() {
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('script', function() {
+gulp.task('script', function(next) {
   return browserify('app.js', { basedir: './src/app', debug: true })
     .transform(babelify)
     .bundle()
-    .on('error', gutil.log)
+    .on('error', function(err) {
+      gutil.log(err);
+      next();
+    })
     // Pass desired output filename to vinyl-source-stream
     .pipe(source('app.js'))
     .pipe(buffer())
