@@ -1,4 +1,5 @@
 import Input from '../input/input';
+import TextureChooser from '../input/texture-chooser';
 
 export default function(controller) {
   return [
@@ -27,7 +28,7 @@ export default function(controller) {
     m('h2', 'VISUAL'),
     m('div.property-edit', [
       m('label', 'Texture'),
-      m.component(Input, { type: 'text', value: controller.selected().texture(), onchange: controller.textureChanged }),
+      m.component(TextureChooser, { value: controller.selected().texture(), onchange: controller.textureChanged }),
     ]),
     m('div.property-edit', [
       m('label', 'Alpha'),

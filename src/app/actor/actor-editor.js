@@ -8,6 +8,8 @@ import ActorOutliner from './actor-outliner';
 import ActorViewport from './actor-viewport';
 import ActorInspector from './actor-inspector';
 
+import AssetBrowser from '../asset/browser';
+
 export default {
   controller: function() {
     let c = {
@@ -72,7 +74,8 @@ export default {
         actor: controller.root,
         selected: controller.selected,
         actorAttrChanged: controller.actorAttrChanged
-      })
+      }),
+      m.component(AssetBrowser, {})
     ];
   }
 };

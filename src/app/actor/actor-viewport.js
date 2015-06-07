@@ -160,10 +160,10 @@ export default {
           controller.enterTranslateMode();
         });
         Mousetrap.bind('r', function() {
-          // controller.enterRotateMode();
+          controller.enterRotateMode();
         });
         Mousetrap.bind('s', function() {
-          // controller.enterScaleMode();
+          controller.enterScaleMode();
         });
         Mousetrap.bind('enter', function() {
           controller.confirmModifyChanges();
@@ -399,12 +399,12 @@ export default {
             controller.drawRectForActorInstance(pair.inst);
             break;
           case MODES.ROTATE:
-            // controller.selected().rotation(pair.inst.rotation);
+            controller.selected().rotation(pair.inst.rotation);
             controller.drawRectForActorInstance(pair.inst);
             break;
           case MODES.SCALE:
-            // controller.selected().scale.x(pair.inst.scale.x);
-            // controller.selected().scale.y(pair.inst.scale.y);
+            controller.selected().scale.x(pair.inst.scale.x);
+            controller.selected().scale.y(pair.inst.scale.y);
             controller.drawRectForActorInstance(pair.inst);
             break;
         }
@@ -583,21 +583,17 @@ export default {
         }
       },
       syncActorInst: function(actor, inst) {
-        // Actor attributes
-        // inst.alpha = actor.alpha;
-        // inst.rotation = actor.rotation;
-        // inst.width = actor.size.x;
-        // inst.height = actor.size.y;
         inst.position.set(actor.position.x(), actor.position.y());
       },
       syncSpriteInst: function(actor, inst) {
-        // Actor attributes
-        // inst.alpha = actor.alpha();
-        // inst.rotation = actor.rotation();
-        // inst.scale.set(actor.scale.x(), actor.scale.y());
         inst.position.set(actor.position.x(), actor.position.y());
-        // Sprite attributes
-        // inst.anchor.set(actor.anchor.x(), actor.anchor.y());
+
+        inst.alpha = actor.alpha();
+        inst.scale.set(actor.scale.x(), actor.scale.y());
+        inst.rotation = actor.rotation();
+        inst.anchor.set(actor.anchor.x(), actor.anchor.y());
+        inst.pivot.set(actor.pivot.x(), actor.pivot.y());
+        inst.setTexture(PIXI.Texture.fromFrame(actor.texture()));
       }
     };
 
