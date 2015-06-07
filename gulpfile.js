@@ -32,7 +32,7 @@ gulp.task('script', function(next) {
     .pipe(buffer())
     // Loads map from browserify file
     .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(uglify())
+      //.pipe(uglify())
     .pipe(sourcemaps.write('.'))
     // Start piping stream to tasks!
     .pipe(gulp.dest('./dist'))
