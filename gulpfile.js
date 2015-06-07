@@ -39,10 +39,13 @@ gulp.task('script', function(next) {
     .pipe(browserSync.stream());
 });
 
-gulp.task('style', function() {
+gulp.task('style', function(next) {
   return gulp.src('./src/app/style/app.scss')
     .pipe(sourcemaps.init())
-      .pipe(sass('./src/app/style/app.scss').on('error', sass.logError))
+      .pipe(sass('./src/app/style/app.scss').on('error', function(err) {
+        sass.logError(err);
+        next();
+      }))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('./dist'))
     .pipe(browserSync.stream());
