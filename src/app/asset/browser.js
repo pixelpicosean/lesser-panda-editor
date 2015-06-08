@@ -61,6 +61,70 @@ export default {
         m('li.asset-item', [
           m('div.thumbnail'),
           m('div.details','13')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','10')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','11')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','12')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','13')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','10')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','11')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','12')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','13')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','10')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','11')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','12')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','13')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','10')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','11')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','12')
+        ]),
+        m('li.asset-item', [
+          m('div.thumbnail'),
+          m('div.details','13')
         ])
       ])
     ]);
