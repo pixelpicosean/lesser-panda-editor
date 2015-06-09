@@ -195,6 +195,39 @@ export default {
         loader.onComplete = function() {
           controller.stage.setBackgroundColor(0xb2dcef);
           controller.createInstance(controller.actor());
+
+          // Create frame cache
+          let frames = Object.keys(PIXI.TextureCache)
+            .map(function(key) {
+              return {
+                key: key,
+                source: PIXI.TextureCache[key].baseTexture.source,
+                rect: PIXI.TextureCache[key].frame
+              };
+            })
+            .map(function(def) {
+              let canvas = document.createElement('canvas');
+              let context = canvas.getContext('2d');
+              let rect = def.rect;
+
+              canvas.width = rect.width;
+              canvas.height = rect.height;
+
+              context.drawImage(
+                def.source,
+                rect.x, rect.y, rect.width, rect.height,
+                0, 0, rect.width, rect.height
+              );
+
+              def.canvas = canvas;
+              def.url = canvas.toDataURL();
+
+              return def;
+            });
+
+          PIXI.FrameCache = frames;
+          m.startComputation();
+          m.endComputation();
         };
         loader.load();
       },
