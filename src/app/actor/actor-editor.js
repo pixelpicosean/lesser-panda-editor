@@ -1,5 +1,6 @@
 import attr from '../util/kefir-variable';
 import m from 'mithril';
+import Mousetrap from 'mousetrap';
 
 import Actor from './actor';
 import Sprite from '../sprite/sprite';
@@ -17,6 +18,8 @@ export default {
 
       root: attr(),
       selected: attr(),
+
+      showAssetBrowser: attr(),
 
       // = Actions ========================================
 
@@ -56,6 +59,16 @@ export default {
     // Select the root by default
     c.selected(c.root());
 
+    // Hide asset browser by default
+    c.showAssetBrowser(false);
+
+    // Setup shortcuts
+    Mousetrap.bind('shift+a', function() {
+      m.startComputation();
+      c.showAssetBrowser(!c.showAssetBrowser());
+      m.endComputation();
+    });
+
     return c;
   },
   view: function(controller) {
@@ -75,7 +88,7 @@ export default {
         selected: controller.selected,
         actorAttrChanged: controller.actorAttrChanged
       }),
-      m.component(AssetBrowser, {})
+      controller.showAssetBrowser() ? m.component(AssetBrowser, {}) : ''
     ];
   }
 };
