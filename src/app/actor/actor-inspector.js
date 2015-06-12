@@ -25,6 +25,11 @@ export default {
 
       // = Actions ========================================
 
+      showAssetBrowser: function(cb) {
+        // console.log('Inspector showAssetBrowser')
+        args.showAssetBrowser && args.showAssetBrowser(cb);
+      },
+
       nameChanged: function(name) {
         c.selected().name(name);
         c.actorAttrChanged(c.selected());

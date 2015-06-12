@@ -28,7 +28,7 @@ export default function(controller) {
     m('h2', 'VISUAL'),
     m('div.property-edit', [
       m('label', 'Texture'),
-      m.component(TextureChooser, { value: controller.selected().texture(), onchange: controller.textureChanged }),
+      m.component(TextureChooser, { value: controller.selected().texture(), onchange: controller.textureChanged, showAssetBrowser: controller.showAssetBrowser }),
     ]),
     m('div.property-edit', [
       m('label', 'Alpha'),

@@ -19,7 +19,9 @@ export default {
       root: attr(),
       selected: attr(),
 
-      showAssetBrowser: attr(),
+      isAssetBrowserOpen: attr(),
+
+      assetBrowserCB: null,
 
       // = Actions ========================================
 
@@ -27,7 +29,21 @@ export default {
        * Actor attributes changed events.
        * @type {kefir-variable}
        */
-      actorAttrChanged: attr()
+      actorAttrChanged: attr(),
+
+      showAssetBrowser: function(cb) {
+        c.assetBrowserCB = cb;
+        c.isAssetBrowserOpen() || c.isAssetBrowserOpen(true);
+      },
+
+      selectAsset: function(key) {
+        // console.log('ActorEditor selectAsset: %s', key);
+
+        c.assetBrowserCB && c.assetBrowserCB(key);
+        c.assetBrowserCB = null;
+
+        c.isAssetBrowserOpen(false);
+      }
     };
 
     // Setup model
@@ -60,12 +76,12 @@ export default {
     c.selected(c.root());
 
     // Hide asset browser by default
-    c.showAssetBrowser(false);
+    c.isAssetBrowserOpen(false);
 
     // Setup shortcuts
     Mousetrap.bind('shift+a', function() {
       m.startComputation();
-      c.showAssetBrowser(!c.showAssetBrowser());
+      c.isAssetBrowserOpen(!c.isAssetBrowserOpen());
       m.endComputation();
     });
 
@@ -86,9 +102,10 @@ export default {
       m.component(ActorInspector, {
         actor: controller.root,
         selected: controller.selected,
-        actorAttrChanged: controller.actorAttrChanged
+        actorAttrChanged: controller.actorAttrChanged,
+        showAssetBrowser: controller.showAssetBrowser
       }),
-      controller.showAssetBrowser() ? m.component(AssetBrowser, {}) : ''
+      controller.isAssetBrowserOpen() ? m.component(AssetBrowser, { onselect: controller.selectAsset }) : ''
     ];
   }
 };

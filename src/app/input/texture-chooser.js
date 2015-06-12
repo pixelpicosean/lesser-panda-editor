@@ -9,21 +9,19 @@ export default {
           el.value = ctx.oldValue = args.value;
         }
       },
-      onkeydown: function(e) {
-        if (e.keyCode === 13) {
-          this.blur();
+      onmousedown: function(e) {
+        if (args.showAssetBrowser) {
+          args.showAssetBrowser(function(key) {
+            this.value = key;
+            args.onchange && args.onchange(this.value);
+          }.bind(this));
         }
-      },
-      onfocus: function() {
-        this.select();
-      },
-      onblur: function() {
-        // Action up
-        args.onchange && args.onchange(this.value);
-      },
-      onmouseup: function() {
-        // Prevent deselect on focus
-        return false;
+
+        // Manually blur this input, so that keyboard shortcuts won't
+        // change its value
+        setTimeout(function() {
+          e.target.blur();
+        }, 20);
       }
     });
   }
