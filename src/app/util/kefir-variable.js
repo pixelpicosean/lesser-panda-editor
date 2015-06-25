@@ -1,5 +1,3 @@
-import Kefir from 'kefir';
-
 export default function(value) {
   var emitter;
   var prop = Kefir.stream(function(e) {

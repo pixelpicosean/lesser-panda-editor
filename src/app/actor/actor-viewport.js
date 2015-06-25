@@ -1,7 +1,3 @@
-import m from 'mithril';
-import PIXI from 'pixi';
-import Mousetrap from 'mousetrap';
-
 const MODES = {
   NORMAL: 0,
   TRANSLATE: 1,

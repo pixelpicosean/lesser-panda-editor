@@ -20,7 +20,6 @@
     "babelify": "^6.1.2",
     "browser-sync": "^2.7.6",
     "browserify": "^10.2.3",
-    "browserify-shim": "^3.8.7",
     "del": "^1.2.0",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
@@ -30,16 +29,5 @@
     "gulp-util": "^3.0.5",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
-  },
-  "browserify": {
-     "transform": [
-       "browserify-shim"
-     ]
-   },
-   "browserify-shim": {
-     "mithril": "global:m",
-     "kefir": "global:Kefir",
-     "pixi": "global:PIXI",
-     "mousetrap": "global:Mousetrap"
-   }
+  }
 }

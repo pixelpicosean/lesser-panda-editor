@@ -1,5 +1,3 @@
-import m from 'mithril';
-
 export default {
   controller: function(args) {
     let c = {

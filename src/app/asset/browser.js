@@ -1,4 +1,3 @@
-import m from 'mithril';
 import SearchInput from '../input/search-input';
 
 export default {

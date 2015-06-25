@@ -1,6 +1,4 @@
 import attr from '../util/kefir-variable';
-import m from 'mithril';
-import Mousetrap from 'mousetrap';
 
 import Actor from './actor';
 import Sprite from '../sprite/sprite';

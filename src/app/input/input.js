@@ -1,5 +1,3 @@
-import m from 'mithril';
-
 export default {
   view: function(c, args) {
     return m('input[type=' + (args.type || 'text') + ']', {

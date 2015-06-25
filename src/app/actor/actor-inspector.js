@@ -1,4 +1,3 @@
-import m from 'mithril';
 import Input from '../input/input';
 
 import attrViews from './attr-views';
