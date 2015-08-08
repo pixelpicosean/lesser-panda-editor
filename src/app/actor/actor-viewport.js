@@ -84,8 +84,8 @@ export default {
         controller.$ = element;
 
         // Initialize PIXI stuff
-        controller.renderer = new PIXI.CanvasRenderer(200, 200, { view: element, resolution: window.devicePixelRatio });
-        controller.stage = new PIXI.Stage();
+        controller.renderer = PIXI.autoDetectRenderer(200, 200, { view: element, resolution: window.devicePixelRatio });
+        controller.stage = new PIXI.Container();
 
         controller.emptyArea = new PIXI.Graphics();
         controller.stage.addChild(controller.emptyArea);
@@ -104,15 +104,15 @@ export default {
           }
         };
 
-        controller.root = new PIXI.DisplayObjectContainer();
+        controller.root = new PIXI.Container();
         controller.stage.addChild(controller.root);
 
         // Container for actor instances
-        controller.actorContainer = new PIXI.DisplayObjectContainer();
+        controller.actorContainer = new PIXI.Container();
         controller.stage.addChild(controller.actorContainer);
 
         // Container for UI
-        controller.uiContainer = new PIXI.DisplayObjectContainer();
+        controller.uiContainer = new PIXI.Container();
         controller.stage.addChild(controller.uiContainer);
 
         // UI
@@ -187,18 +187,18 @@ export default {
         let assetsToLoad = [
           'media/sprites.json'
         ];
-        let loader = new PIXI.AssetLoader(assetsToLoad);
-        loader.onComplete = function() {
-          controller.stage.setBackgroundColor(0xb2dcef);
+        let loader = PIXI.loader.add(assetsToLoad);
+        loader.once('complete', function() {
+          controller.renderer.backgroundColor = 0xb2dcef;
           controller.createInstance(controller.actor());
 
           // Create frame cache
-          let frames = Object.keys(PIXI.TextureCache)
+          let frames = Object.keys(PIXI.utils.TextureCache)
             .map(function(key) {
               return {
                 key: key,
-                source: PIXI.TextureCache[key].baseTexture.source,
-                rect: PIXI.TextureCache[key].frame
+                source: PIXI.utils.TextureCache[key].baseTexture.source,
+                rect: PIXI.utils.TextureCache[key].frame
               };
             })
             .map(function(def) {
@@ -224,7 +224,7 @@ export default {
           PIXI.FrameCache = frames;
           m.startComputation();
           m.endComputation();
-        };
+        });
         loader.load();
       },
 
@@ -543,7 +543,7 @@ export default {
       },
       createActorInstance: function(actor, parent) {
         // Create actor instance
-        let inst = new PIXI.DisplayObjectContainer();
+        let inst = new PIXI.Container();
 
         // Save actor-instance pair to hash for later use
         inst.id = actor.id;
@@ -622,7 +622,7 @@ export default {
         inst.rotation = actor.rotation();
         inst.anchor.set(actor.anchor.x(), actor.anchor.y());
         inst.pivot.set(actor.pivot.x(), actor.pivot.y());
-        inst.setTexture(PIXI.Texture.fromFrame(actor.texture()));
+        inst.texture = PIXI.Texture.fromFrame(actor.texture());
       }
     };
 
