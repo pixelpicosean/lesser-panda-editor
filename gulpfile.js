@@ -13,9 +13,7 @@ var browserSync = require('browser-sync').create();
 
 gulp.task('vendor', function() {
   return gulp.src('./src/vendor/**/*.js')
-    .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(concat('vendor.js'))
-    .pipe(sourcemaps.write('.'))
+    .pipe(concat('vendor.js'))
     .pipe(gulp.dest('./dist'));
 });
 

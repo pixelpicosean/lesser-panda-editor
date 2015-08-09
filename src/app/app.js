@@ -1,3 +1,12 @@
-import ActorEditor from './actor/actor-editor';
+let Editor = {
+  controller: function() {
+    return {
+      title: 'CIRCULUS EDITOR'
+    };
+  },
+  view: function(ctrl) {
+    return m('h1', ctrl.title);
+  }
+};
 
-m.mount(document.getElementById('app'), ActorEditor);
+m.mount(document.querySelector('#app'), Editor);
