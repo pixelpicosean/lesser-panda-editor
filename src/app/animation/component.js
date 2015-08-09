@@ -4,11 +4,11 @@ export default {
   },
   view: function(ctrl) {
     return m('div.anim-editor', [
-      m('div', [
+      m('div.anim-editor-upper', [
         m('section.sprite-selector', 'Sprite Selector'),
         m('section.anim-preview', 'Anim Preview')
       ]),
-      m('div', [
+      m('div.anim-editor-lower', [
         m('ul.anim-list', [
           m('li.anim-list-item', 'idle'),
           m('li.anim-list-item', 'run'),

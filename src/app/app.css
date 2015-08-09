@@ -6,7 +6,7 @@
 body {
   font-family: Roboto, HelveticaNeue-Light, 'Helvetica Neue', HelveticaNeue, Helvetica, Arial, Geneva, sans-serif;
 
-  color: #9f9f9f;
+  color: white;
   background-color: #252525;
 }
 html, body {
@@ -14,6 +14,13 @@ html, body {
 }
 li {
   list-style-type: none;
+}
+
+/* Utils */
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* App */
