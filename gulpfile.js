@@ -4,8 +4,6 @@ var concat = require('gulp-concat');
 var del = require('del');
 var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
-var uglify = require('gulp-uglify');
-var sass = require('gulp-sass');
 var browserSync = require('browser-sync').create();
 
 gulp.task('vendor', function() {
@@ -28,13 +26,8 @@ gulp.task('script', function(next) {
 });
 
 gulp.task('style', function(next) {
-  return gulp.src('./src/app/app.scss')
-    .pipe(sourcemaps.init())
-      .pipe(sass('./src/app/app.scss').on('error', function(err) {
-        sass.logError(err);
-        next();
-      }))
-    .pipe(sourcemaps.write('.'))
+  return gulp.src('./src/app/**/*.css')
+    .pipe(concat('app.css'))
     .pipe(gulp.dest('./dist'))
     .pipe(browserSync.stream());
 });
@@ -54,7 +47,7 @@ gulp.task('clean', function (done) {
 gulp.task('watch', function() {
   gulp.watch('./src/app/*.html', ['html']);
   gulp.watch('./src/app/**/*.js', ['script']);
-  gulp.watch('./src/app/style/**/*.scss', ['style']);
+  gulp.watch('./src/app/**/*.css', ['style']);
 });
 
 gulp.task('server', function() {
