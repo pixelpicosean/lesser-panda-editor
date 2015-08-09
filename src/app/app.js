@@ -1,11 +1,8 @@
+import AnimationEditor from 'animation/component';
+
 let Editor = {
-  controller: function() {
-    return {
-      title: 'CIRCULUS EDITOR'
-    };
-  },
-  view: function(ctrl) {
-    return m('h1', ctrl.title);
+  view: function() {
+    return m.component(AnimationEditor);
   }
 };
 
