@@ -1,12 +1,9 @@
 var gulp = require('gulp');
+var babel = require('gulp-babel');
 var concat = require('gulp-concat');
 var del = require('del');
 var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
-var babelify = require('babelify');
-var browserify = require('browserify');
-var buffer = require('vinyl-buffer');
-var source = require('vinyl-source-stream');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-sass');
 var browserSync = require('browser-sync').create();
@@ -18,29 +15,22 @@ gulp.task('vendor', function() {
 });
 
 gulp.task('script', function(next) {
-  return browserify('app.js', { basedir: './src/app', debug: true })
-    .transform(babelify)
-    .bundle()
+  return gulp.src('./src/app/**/*.js')
+    .pipe(sourcemaps.init())
+    .pipe(babel({ modules: 'system' }))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('./dist'))
+    .pipe(browserSync.stream())
     .on('error', function(err) {
       gutil.log(err);
       next();
-    })
-    // Pass desired output filename to vinyl-source-stream
-    .pipe(source('app.js'))
-    .pipe(buffer())
-    // Loads map from browserify file
-    .pipe(sourcemaps.init({ loadMaps: true }))
-      //.pipe(uglify())
-    .pipe(sourcemaps.write('.'))
-    // Start piping stream to tasks!
-    .pipe(gulp.dest('./dist'))
-    .pipe(browserSync.stream());
+    });
 });
 
 gulp.task('style', function(next) {
-  return gulp.src('./src/app/style/app.scss')
+  return gulp.src('./src/app/app.scss')
     .pipe(sourcemaps.init())
-      .pipe(sass('./src/app/style/app.scss').on('error', function(err) {
+      .pipe(sass('./src/app/app.scss').on('error', function(err) {
         sass.logError(err);
         next();
       }))

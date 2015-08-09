@@ -11,6 +11,11 @@
   <section id="app"></section>
 
   <script src="vendor.js"></script>
-  <script src="app.js"></script>
+  <script>
+    System.config({
+      transpiler: 'babel'
+    });
+    System.import('app.js');
+  </script>
 </body>
 </html>
