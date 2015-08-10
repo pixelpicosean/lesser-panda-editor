@@ -16,6 +16,14 @@ li {
   list-style-type: none;
 }
 
+/* Box sizing */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 /* Utils */
 .center {
   display: flex;
