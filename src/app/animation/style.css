@@ -50,6 +50,26 @@
       /* dev only */
       background-color: #689f38;
     }
+      .anim-list-header {
+        flex: 0 0 1.2em;
+
+
+        background-color: #009688;
+
+        padding-left: 0.4em;
+      }
+      .anim-list-container {
+        overflow-y: scroll;
+        padding-top: 0.2em;
+      }
+        .anim-list-item {
+          padding-left: 1.2em;
+          height: 1.2em;
+        }
+        .anim-list-item.is-selected {
+          background-color: #00796b;
+        }
+
     .anim-settings {
       flex: 1 0 auto;
 
