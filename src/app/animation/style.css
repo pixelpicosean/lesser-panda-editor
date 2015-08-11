@@ -40,9 +40,12 @@
     display: flex;
     flex-direction: row;
   }
+  .anim-editor-lower > * {
+    border-right: 1px solid black;
+  }
 
     .anim-list {
-      flex: 1 0 auto;
+      flex: 1 0 120px;
 
       display: flex;
       flex-direction: column;
@@ -52,7 +55,6 @@
     }
       .anim-list-header {
         flex: 0 0 1.2em;
-
 
         background-color: #009688;
 
@@ -71,7 +73,7 @@
         }
 
     .anim-settings {
-      flex: 1 0 auto;
+      flex: 1 0 120px;
 
       display: flex;
       flex-direction: column;
@@ -79,6 +81,25 @@
       /* dev only */
       background-color: #8bc34a;
     }
+      .anim-settings-header {
+        flex: 0 0 1.2em;
+
+        background-color: #009688;
+
+        padding-left: 0.4em;
+      }
+      .anim-settings-container {
+        overflow-y: scroll;
+        padding-top: 0.2em;
+      }
+        .anim-settings-item {
+          padding-left: 1.2em;
+          height: 1.2em;
+        }
+        .anim-settings-item.is-selected {
+          background-color: #00796b;
+        }
+
     .anim-sequence {
       flex: 4 0 auto;
 
@@ -88,3 +109,13 @@
       /* dev only */
       background-color: #cddc39;
     }
+      .anim-sequence-controls {
+        flex: 0 0 1.2em;
+
+        background-color: #009688;
+
+        padding-left: 0.4em;
+      }
+      .anim-sequence-editor {
+        flex: 1;
+      }

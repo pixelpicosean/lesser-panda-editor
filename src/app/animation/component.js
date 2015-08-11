@@ -1,6 +1,32 @@
 export default {
   controller: function() {
+    let ctrl = {
+      framesRenderer: null,
 
+      updateFrames: function(el, initialized) {
+        if (initialized) {
+          ctrl.renderFrames();
+        }
+        else {
+          ctrl.initFramesView(el);
+        }
+      },
+
+      initFramesView: function(el) {
+        var w = el.offsetWidth;
+        var h = el.offsetHeight;
+        ctrl.framesRenderer = PIXI.autoDetectRenderer(w, h, {
+          view: el,
+          resolution: window.devicePixelRatio
+        });
+
+        // el.style.width = w + 'px';
+        // el.style.height = h + 'px';
+      },
+      renderFrames: function() {}
+    };
+
+    return ctrl;
   },
   view: function(ctrl) {
     return m('div.anim-editor', [
@@ -10,7 +36,7 @@ export default {
       ]),
       m('div.anim-editor-lower', [
         m('div.anim-list', [
-          m('header.anim-list-header', 'Animations'),
+          m('header.anim-list-header', 'ANIMATIONS'),
           m('ul.anim-list-container', [
             m('li.anim-list-item', 'idle'),
             m('li.anim-list-item', 'run'),
@@ -23,21 +49,18 @@ export default {
             m('li.anim-list-item', 'born')
           ])
         ]),
-        m('ul.anim-settings', [
-          m('li.anim-settings-item', 'Speed'),
-          m('li.anim-settings-item', 'Loop')
+        m('div.anim-settings', [
+          m('header.anim-settings-header', 'SETTINGS'),
+          m('ul.anim-settings-container', [
+            m('li.anim-settings-item', 'Speed'),
+            m('li.anim-settings-item', 'Loop')
+          ])
         ]),
         m('div.anim-sequence', [
           m('div.anim-sequence-controls', [
-            m('a.anim-sequence-controls-play', 'Play')
+            m('a.anim-sequence-controls-play', 'PLAY')
           ]),
-          m('ul.anim-sequence-editor', [
-            m('li.anim-sequence-editor-item', '0'),
-            m('li.anim-sequence-editor-item', '1'),
-            m('li.anim-sequence-editor-item', '2'),
-            m('li.anim-sequence-editor-item', '3'),
-            m('li.anim-sequence-editor-item', '4')
-          ])
+          m('canvas.anim-sequence-editor[width=20,height=20]', { config: ctrl.updateFrames })
         ])
       ])
     ]);
