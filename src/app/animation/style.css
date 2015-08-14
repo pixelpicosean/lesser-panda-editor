@@ -61,7 +61,7 @@
         padding-left: 0.4em;
       }
       .anim-list-container {
-        overflow-y: scroll;
+        overflow-y: auto;
         padding-top: 0.2em;
       }
         .anim-list-item {
@@ -89,7 +89,7 @@
         padding-left: 0.4em;
       }
       .anim-settings-container {
-        overflow-y: scroll;
+        overflow-y: auto;
         padding-top: 0.2em;
       }
         .anim-settings-item {
@@ -117,5 +117,6 @@
         padding-left: 0.4em;
       }
       .anim-sequence-editor {
-        flex: 1;
+        flex: 1 1 auto;
+        height: 100px;
       }

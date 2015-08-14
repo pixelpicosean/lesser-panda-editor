@@ -20,10 +20,32 @@ export default {
           resolution: window.devicePixelRatio
         });
 
-        // el.style.width = w + 'px';
-        // el.style.height = h + 'px';
+        ctrl.framesContainer = new PIXI.Container();
+
+        var rect, frame;
+        for (var i = 0; i < 6; i++) {
+          rect = new PIXI.Graphics();
+          rect.beginFill(0xffc107);
+          rect.drawRect(0, 0, 40, 60);
+          rect.endFill();
+
+          rect.position.set(20 + i * 50, 20);
+
+          frame = new PIXI.Text(i + 1 + '', {
+            font: '24px Verdana',
+            fill: 'white'
+          });
+          frame.position.set(20 - frame.width * 0.5, 14);
+          rect.addChild(frame);
+
+          ctrl.framesContainer.addChild(rect);
+        }
+
+        ctrl.renderFrames();
       },
-      renderFrames: function() {}
+      renderFrames: function() {
+        ctrl.framesRenderer.render(ctrl.framesContainer);
+      }
     };
 
     return ctrl;
@@ -60,7 +82,7 @@ export default {
           m('div.anim-sequence-controls', [
             m('a.anim-sequence-controls-play', 'PLAY')
           ]),
-          m('canvas.anim-sequence-editor[width=20,height=20]', { config: ctrl.updateFrames })
+          m('canvas.anim-sequence-editor', { config: ctrl.updateFrames })
         ])
       ])
     ]);
