@@ -119,4 +119,22 @@
       .anim-sequence-editor {
         flex: 1 1 auto;
         height: 100px;
+
+        overflow-x: auto;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
       }
+        .anim-sequence-editor-frame {
+          flex: 0 0 64px;
+          height: 80%;
+          margin: 0 4px;
+
+          background-color: #ffc107;
+          color: white;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
