@@ -1,6 +1,7 @@
-# Mithril Game Editor (WIP)
+# LesserPanda Game Editor (WIP)
 
-A game editor using Mithril frameowrk, designed for Panda Engine.
+A simple game editor for LesserPanda. It will become a collection of small
+editor components instead of a rich all-in-one solution.
 
 ## Build
 
@@ -12,7 +13,7 @@ npm install
 gulp
 ```
 
-## Coding Rules
+## Keep in Mind
 
 - Try to use FRP(Functional Reactive Programming) as more as possible
 - Standalone components should be REAL components, just like the `Input`
