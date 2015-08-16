@@ -3,15 +3,24 @@
 A simple game editor for LesserPanda. It will become a collection of small
 editor components instead of a rich all-in-one solution.
 
-## Build
+## Usage
 
-```shell
-# Install dependencies
-npm install
+1. Install Gulp globally: `npm install -g gulp`
+2. Run `npm install` and then `jspm install` in the root directory
+3. Run `gulp` or `npm start` to start the local dev server
 
-# Start a server and watch changes
-gulp
-```
+### Note
+
+Make sure that the `src/css` and `src/img` folder exist, they
+are ignored by Git but required for building tasks.
+
+## Generating documentation
+
+Run `npm run docs` to generate documentation for your JavaScript and SASS automatically in the `docs` folder.
+
+## Building
+
+Run `gulp build` or `npm run build` to build the app for distribution in the `dist` folder.
 
 ## Keep in Mind
 

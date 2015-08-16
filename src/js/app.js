@@ -1,4 +1,5 @@
-import AnimationEditor from 'animation/component';
+import m from 'mithril';
+import AnimationEditor from './animation';
 
 let Editor = {
   view: function() {

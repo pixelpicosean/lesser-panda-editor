@@ -1,12 +1,15 @@
-.DS_Store
-
-# compiled output
-/dist
-/tmp
-
-# dependencies
-/node_modules
-/bower_components
-
-# misc
+# Debug.
 npm-debug.log
+
+# External libraries.
+node_modules/
+src/jspm_packages/
+
+# Compiled css.
+src/css/
+
+# Production path.
+dist/
+
+# Document.
+docs/

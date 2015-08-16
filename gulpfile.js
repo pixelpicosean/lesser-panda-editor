@@ -1,64 +1,39 @@
+'use strict';
+
+/*
+ * gulpfile.js
+ * ===========
+ * Rather than manage one giant configuration file responsible
+ * for creating multiple tasks, each task has been broken out into
+ * its own file in the 'gulp' folder. Any files in that directory get
+ *  automatically required below.
+ *
+ * To add a new task, simply add a new task file in that directory.
+ */
+
 var gulp = require('gulp');
-var babel = require('gulp-babel');
-var concat = require('gulp-concat');
-var del = require('del');
-var gutil = require('gulp-util');
-var sourcemaps = require('gulp-sourcemaps');
-var browserSync = require('browser-sync').create();
+var requireDir = require('require-dir');
 
-gulp.task('vendor', function() {
-  return gulp.src('./src/vendor/**/*.js')
-    .pipe(concat('vendor.js'))
-    .pipe(gulp.dest('./dist'));
-});
+// Specify paths & globbing patterns for tasks.
+global.paths = {
+  // HTML sources.
+  'html': './src/*.html',
+  // JS sources.
+  'js': './src/js/**/*.js',
+  // SASS sources.
+  'sass': './src/scss/**/*.scss',
+  // Image sources.
+  'img': './src/img/*',
+  // Sources folder.
+  'src': './src',
+  // Compiled CSS folder.
+  'css': './src/css',
+  // Distribution folder.
+  'dist': './dist'
+};
 
-gulp.task('script', function(next) {
-  return gulp.src('./src/app/**/*.js')
-    .pipe(sourcemaps.init())
-    .pipe(babel({ modules: 'system' }))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist'))
-    .pipe(browserSync.stream())
-    .on('error', function(err) {
-      gutil.log(err);
-      next();
-    });
-});
+// Require all tasks in the 'gulp' folder.
+requireDir('./gulp', { recurse: false });
 
-gulp.task('style', function(next) {
-  return gulp.src('./src/app/**/*.css')
-    .pipe(concat('app.css'))
-    .pipe(gulp.dest('./dist'))
-    .pipe(browserSync.stream());
-});
-
-gulp.task('html', function() {
-  return gulp.src('./src/app/index.html')
-    .pipe(gulp.dest('./dist'))
-    .pipe(browserSync.stream());
-});
-
-gulp.task('build', ['vendor', 'script', 'style', 'html']);
-
-gulp.task('clean', function (done) {
-  del(['dist'], done);
-});
-
-gulp.task('watch', function() {
-  gulp.watch('./src/app/*.html', ['html']);
-  gulp.watch('./src/app/**/*.js', ['script']);
-  gulp.watch('./src/app/**/*.css', ['style']);
-});
-
-gulp.task('server', function() {
-  browserSync.init({
-    port: 4200,
-    server: {
-      baseDir: ['dist', 'public']
-    },
-    ghostMode: false,
-    notify: false
-  });
-});
-
-gulp.task('default', ['build', 'watch', 'server']);
+// Default task; start local server & watch for changes.
+gulp.task('default', ['connect', 'watch']);

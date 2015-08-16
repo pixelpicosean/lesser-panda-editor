@@ -1,28 +1,76 @@
 {
-  "name": "mithril-level-editor",
-  "version": "0.0.1",
-  "description": "A simple level editor using Mithril.",
+  "name": "lp-editor",
+  "version": "0.1.0",
+  "description": "Game editor for LesserPanda engine",
+  "main": "dist/index.html",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pixelpicosean/mithril-level-editor.git"
+    "url": "git+https://github.com/pixelpicosean/LP-Editor.git"
+  },
+  "license": "Unlicense",
+  "scripts": {
+    "build": "gulp build",
+    "docs": "npm run sassdocs && npm run jsdocs",
+    "start": "gulp",
+    "buildjs": "jspm bundle-sfx js/app dist/app.min.js --minify --skip-source-maps",
+    "jsdocs": "esdoc -c .esdoc.json",
+    "sassdocs": "sassdoc src/scss"
   },
   "keywords": [
-    "editor",
-    "game"
+    "es6",
+    "jspm",
+    "gulp",
+    "babel",
+    "systemjs"
   ],
-  "author": "Sean Bohan",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/pixelpicosean/mithril-level-editor/issues"
+  "directories": {
+    "doc": "docs",
+    "test": "test",
+    "baseURL": "src",
+    "packages": "src/jspm_packages"
   },
-  "homepage": "https://github.com/pixelpicosean/mithril-level-editor#README.md",
   "devDependencies": {
-    "browser-sync": "^2.8.2",
     "del": "^1.2.0",
+    "esdoc": "^0.1.2",
+    "eslint": "^1.1.0",
+    "eslint-config-standard": "^4.1.0",
+    "eslint-plugin-standard": "^1.2.0",
     "gulp": "^3.9.0",
-    "gulp-babel": "^5.2.0",
-    "gulp-concat": "^2.6.0",
+    "gulp-autoprefixer": "^2.3.1",
+    "gulp-cached": "^1.1.0",
+    "gulp-concat": "^2.5.2",
+    "gulp-connect": "^2.2.0",
+    "gulp-eslint": "^1.0.0",
+    "gulp-imagemin": "^2.2.1",
+    "gulp-minify-css": "^1.1.6",
+    "gulp-minify-html": "^1.0.3",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.3",
+    "gulp-sass": "^2.0.1",
     "gulp-sourcemaps": "^1.5.2",
-    "gulp-util": "^3.0.6"
+    "gulp-uglify": "^1.2.0",
+    "gulp-util": "^3.0.5",
+    "imagemin-pngquant": "^4.1.0",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.1.0",
+    "sassdoc": "^2.1.15"
+  },
+  "jspm": {
+    "directories": {
+      "baseURL": "src",
+      "doc": "docs",
+      "test": "test"
+    },
+    "dependencies": {
+      "kefir": "npm:kefir@^2.7.2",
+      "mithril": "npm:mithril@^0.2.0",
+      "mousetrap": "npm:mousetrap@^1.5.3",
+      "pixi.js": "npm:pixi.js@^3.0.7"
+    },
+    "devDependencies": {
+      "babel": "npm:babel-core@^5.1.13",
+      "babel-runtime": "npm:babel-runtime@^5.1.13",
+      "core-js": "npm:core-js@^0.9.4"
+    }
   }
 }
