@@ -7,6 +7,7 @@ var connect = require('gulp-connect');
 gulp.task('connect', function() {
   connect.server({
     root: global.paths.src,
+    port: 4200,
     livereload: true
   });
 });
