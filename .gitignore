@@ -1,15 +1,8 @@
-# Debug.
+node_modules
+!app/node_modules
+.DS_Store
+config/BUILD
 npm-debug.log
-
-# External libraries.
-node_modules/
-src/jspm_packages/
-
-# Compiled css.
-src/css/
-
-# Production path.
-dist/
-
-# Document.
-docs/
+app/node_modules/public/js/bundle.*
+build/
+.idea/

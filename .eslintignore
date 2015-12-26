@@ -1,7 +1,1 @@
-dist/
-docs/
-gulp/
-src/jspm_packages/
-.esdoc.json
-gulpfile.js
-package.json
+app/node_modules/public/js/
