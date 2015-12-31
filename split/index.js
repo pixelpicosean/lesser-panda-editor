@@ -1,13 +1,9 @@
+import style from './style.css';
 
-'use strict';
-
-(function() {
-
-var global = this
+var global = window
   , addEventListener = 'addEventListener'
   , removeEventListener = 'removeEventListener'
   , getBoundingClientRect = 'getBoundingClientRect'
-  , isIE8 = global.attachEvent && !global[addEventListener]
   , document = global.document
 
   , calc = (function () {
@@ -52,20 +48,20 @@ var global = this
     if (typeof options.direction === 'undefined') options.direction = 'horizontal'
 
     if (options.direction == 'horizontal') {
-        dimension = 'width'
+        dimension = 'flex-basis'
         clientDimension = 'clientWidth'
         clientAxis = 'clientX'
         position = 'left'
-        gutterClass = 'gutter gutter-horizontal'
+        gutterClass = `${style.gutter} ${style.gutterHorizontal}`
         paddingA = 'paddingLeft'
         paddingB = 'paddingRight'
         if (!options.cursor) options.cursor = 'ew-resize'
     } else if (options.direction == 'vertical') {
-        dimension = 'height'
+        dimension = 'flex-basis'
         clientDimension = 'clientHeight'
         clientAxis = 'clientY'
         position = 'top'
-        gutterClass = 'gutter gutter-vertical'
+        gutterClass = `${style.gutter} ${style.gutterVertical}`
         paddingA = 'paddingTop'
         paddingB = 'paddingBottom'
         if (!options.cursor) options.cursor = 'ns-resize'
@@ -189,16 +185,15 @@ var global = this
             var computedStyle = global.getComputedStyle(this.parent)
               , parentSize = this.parent[clientDimension] - parseFloat(computedStyle[paddingA]) - parseFloat(computedStyle[paddingB])
 
-            this.size = this.a[getBoundingClientRect]()[dimension] + this.b[getBoundingClientRect]()[dimension] + this.aGutterSize + this.bGutterSize
+            this.size = this.a[getBoundingClientRect]()['width'] + this.b[getBoundingClientRect]()['width'] + this.aGutterSize + this.bGutterSize
             this.percentage = Math.min(this.size / parentSize * 100, 100)
             this.start = this.a[getBoundingClientRect]()[position]
         }
       , adjust = function (offset) {
             // A size is the same as offset. B size is total size - A size.
             // Both sizes are calculated from the initial parent percentage.
-
-            this.a.style[dimension] = calc + '(' + (offset / this.size * this.percentage) + '% - ' + this.aGutterSize + 'px)'
-            this.b.style[dimension] = calc + '(' + (this.percentage - (offset / this.size * this.percentage)) + '% - ' + this.bGutterSize + 'px)'
+            this.a.style[dimension] = `calc(${offset / this.size * this.percentage}% - ${this.aGutterSize}px)`
+            this.b.style[dimension] = `calc(${this.percentage - (offset / this.size * this.percentage)}% - ${this.bGutterSize}px)`
         }
       , fitMin = function () {
             var self = this
@@ -295,39 +290,28 @@ var global = this
             }
         }
 
-        // IE9 and above
-        if (!isIE8) {
-            if (i > 0) {
-                var gutter = document.createElement('div')
+        if (i > 0) {
+            var gutter = document.createElement('div')
 
-                gutter.className = gutterClass
-                gutter.style[dimension] = options.gutterSize + 'px'
+            gutter.className = gutterClass
+            gutter.style[dimension] = options.gutterSize + 'px'
 
-                gutter[addEventListener]('mousedown', startDragging.bind(pair))
-                gutter[addEventListener]('touchstart', startDragging.bind(pair))
+            gutter[addEventListener]('mousedown', startDragging.bind(pair))
+            gutter[addEventListener]('touchstart', startDragging.bind(pair))
 
-                parent.insertBefore(gutter, el)
+            parent.insertBefore(gutter, el)
 
-                pair.gutter = gutter
-            }
+            pair.gutter = gutter
+        }
 
-            if (i === 0 || i == ids.length - 1) {
-                gutterSize = options.gutterSize / 2
-            }
+        if (i === 0 || i == ids.length - 1) {
+            gutterSize = options.gutterSize / 2
+        }
 
-            if (typeof options.sizes[i] === 'string' || options.sizes[i] instanceof String) {
-                size = options.sizes[i]
-            } else {
-                size = calc + '(' + options.sizes[i] + '% - ' + gutterSize + 'px)'
-            }
-
-        // IE8 and below
+        if (typeof options.sizes[i] === 'string' || options.sizes[i] instanceof String) {
+            size = options.sizes[i]
         } else {
-            if (typeof options.sizes[i] === 'string' || options.sizes[i] instanceof String) {
-                size = options.sizes[i]
-            } else {
-                size = options.sizes[i] + '%'
-            }
+            size = calc + '(' + options.sizes[i] + '% - ' + gutterSize + 'px)'
         }
 
         el.style[dimension] = size
@@ -340,13 +324,4 @@ var global = this
     balancePairs(pairs)
 }
 
-if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-        exports = module.exports = Split
-    }
-    exports.Split = Split
-} else {
-    global.Split = Split
-}
-
-}).call(window)
+exports = module.exports = Split;
