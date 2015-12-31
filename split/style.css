@@ -6,19 +6,28 @@
   overflow-y: auto;
   overflow-x: hidden;
 
+  display: flex;
   flex: 1;
 }
+.split.splitHorizontal {
+  height: 100%;
+  flex-direction: row;
+}
+.split.splitVertical {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
 .gutter {
   background-color: #f0f;
   flex: 0 0 10px;
 }
 .gutter.gutterHorizontal {
+  height: 100%;
   cursor: ew-resize;
 }
 .gutter.gutterVertical {
+  width: 100%;
   cursor: ns-resize;
-}
-.split.splitHorizontal, .gutter.gutterHorizontal {
-  height: 100%;
-  /*float: left;*/
 }

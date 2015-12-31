@@ -29,6 +29,7 @@ var global = window
 
   , Split = function (ids, options) {
     var dimension
+      , sizeDimension
       , i
       , clientDimension
       , clientAxis
@@ -49,6 +50,7 @@ var global = window
 
     if (options.direction == 'horizontal') {
         dimension = 'flex-basis'
+        sizeDimension = 'width'
         clientDimension = 'clientWidth'
         clientAxis = 'clientX'
         position = 'left'
@@ -58,6 +60,7 @@ var global = window
         if (!options.cursor) options.cursor = 'ew-resize'
     } else if (options.direction == 'vertical') {
         dimension = 'flex-basis'
+        sizeDimension = 'height'
         clientDimension = 'clientHeight'
         clientAxis = 'clientY'
         position = 'top'
@@ -185,7 +188,7 @@ var global = window
             var computedStyle = global.getComputedStyle(this.parent)
               , parentSize = this.parent[clientDimension] - parseFloat(computedStyle[paddingA]) - parseFloat(computedStyle[paddingB])
 
-            this.size = this.a[getBoundingClientRect]()['width'] + this.b[getBoundingClientRect]()['width'] + this.aGutterSize + this.bGutterSize
+            this.size = this.a[getBoundingClientRect]()[sizeDimension] + this.b[getBoundingClientRect]()[sizeDimension] + this.aGutterSize + this.bGutterSize
             this.percentage = Math.min(this.size / parentSize * 100, 100)
             this.start = this.a[getBoundingClientRect]()[position]
         }
