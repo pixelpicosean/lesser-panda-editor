@@ -6,6 +6,7 @@ import h from 'editor/snabbdom/h';
 import EventEmitter from 'engine/eventemitter3';
 import R from 'engine/reactive';
 import Split from 'editor/split';
+import loader from 'engine/loader';
 
 const patch = snabbdom.init([
   require('editor/snabbdom/modules/class'),
@@ -29,18 +30,28 @@ function buildSplit() {
   if (leftElm && rightElm) {
     Split([leftElm, rightElm], {
       sizes: [25, 75],
-      gutterSize: 6,
+      minSize: [100, 300],
+      gutterSize: 4,
     });
   }
 }
 
-const vnode =
-  h(`div.${splitStyle.split}.${splitStyle.splitHorizontal}.${style.container}`, [
-    h(`div.${splitStyle.split}.${style.typeNav}`, { hook: { insert: setLeft } }),
-    h(`div.${splitStyle.split}.${style.gridView}`, { hook: { insert: setRight } }),
-  ]);
-
 // Streams
+let frameKeys$ = R.fromEvents(loader, 'complete')
+  .map(() => Object.keys(loader.resources))
+  .toProperty()
+  .onValue(() => 0);
 
+const node = key => h(`div.${style.gridNode}`, key);
 
-export default container => patch(container, vnode);
+const view = keys => {
+  return h(`div.${splitStyle.split}.${splitStyle.splitHorizontal}.${style.container}`, [
+    h(`div.${splitStyle.split}.${style.typeNav}`, { hook: { insert: setLeft } }),
+    h(`div.${splitStyle.split}.${style.gridView}`, { hook: { insert: setRight } }, keys.map(node)),
+  ]);
+}
+
+export default container => {
+  frameKeys$.map(view).scan(patch, container)
+    .onValue(() => 0);
+}
