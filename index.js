@@ -3,6 +3,8 @@ import outliner from './components/outliner';
 import R from 'engine/reactive';
 import EventEmitter from 'engine/eventemitter3';
 
+import './reset.css';
+
 // Model
 const init = () => ({
   objs: [
