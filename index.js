@@ -7,10 +7,32 @@ import './reset.css';
 
 // Model
 const init = () => ({
-  objs: [
-    { id: 0, name: 'sky', children: [] },
-    { id: 1, name: 'ground', children: [] },
-    { id: 2, name: 'mario', },
+  children: [
+    {
+      id: 0,
+      type: 'sprite',
+      name: 'sky',
+      children: [],
+    },
+    {
+      id: 1,
+      type: 'sprite',
+      name: 'ground',
+      children: [
+        {
+          id: 2,
+          type: 'sprite',
+          name: 'coin',
+          children: [],
+        },
+      ],
+    },
+    {
+      id: 3,
+      type: 'animation',
+      name: 'mario',
+      children: [],
+    },
   ],
   selected: 1,
 });
