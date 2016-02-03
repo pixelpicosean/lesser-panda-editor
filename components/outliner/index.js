@@ -9,7 +9,7 @@ const patch = snabbdom.init([
   require('editor/snabbdom/modules/eventlisteners'),
 ]);
 
-import s from './style.css';
+import css from './style.css';
 
 
 export default (container, model$, doAction) => {
@@ -20,14 +20,15 @@ export default (container, model$, doAction) => {
   // View
   const EMPTY = [];
 
+  const viewItem = (obj) => h(`li`, [
+    h(`label.${css.name}.${css[obj.type]}`, { on: { click: [select, obj.id] } }, obj.name || 'object'),
+    h(`input.${css.toggle}`, { props: { type: 'checkbox' } }),
+    h(`ol`, (obj.children || EMPTY).map(viewItem)),
+  ]);
+
   const view = (model) => h('section.outliner', [
     h('header', 'Outliner'),
-    h('ul', model.objs.map((obj) =>
-      h(`li${model.selected === obj.id ? '.' + s.selected : ''}`, { on: { click: [select, obj.id] } }, [
-        h('div.leaf', obj.name || 'object'),
-        h('ul.children', obj.children || EMPTY),
-      ])
-    )),
+    h(`ol.${css.tree}`, model.children.map(viewItem)),
   ]);
 
   // Update view based on model changes

@@ -1,3 +1,73 @@
+.tree {
+  padding: 0 0 0 20px;
+}
+
+.tree li {
+  position: relative;
+  margin-left: -15px;
+  list-style: none;
+}
+
+.tree li input + ol {
+  background: url(./toggle-expand.png) 40px 0 no-repeat;
+  margin: -0.938em 0 0 -44px; /* 15px */
+  display: block;
+  height: 1em;
+}
+
+.tree li input + ol > li {
+  display: none;
+  margin-left: -14px !important;
+  padding-left: 1px;
+}
+
+.tree li input:checked + ol {
+  background: url(./toggle.png) 40px 5px no-repeat;
+  margin: -1.25em 0 0 -44px; /* 20px */
+  padding: 1.563em 0 0 80px;
+  height: auto;
+}
+.tree li input:checked + ol > li {
+  display: block;
+  margin: 0 0 0.125em;  /* 2px */
+}
+.tree li input:checked + ol > li:last-child {
+  margin: 0 0 0.063em; /* 1px */
+}
+
+.children > li {
+  display: none;
+  margin-left: -14px !important;
+  padding-left: 1px;
+}
+
+.toggle {
+  position: absolute;
+  left: 0;
+  margin-left: 0;
+  opacity: 0;
+  z-index: 2;
+  cursor: pointer;
+  height: 1em;
+  width: 1em;
+  top: 0;
+}
+
+.name {
+  cursor: pointer;
+  display: block;
+  padding-left: 37px;
+}
+
+/* Icon of different objects */
+.sprite {
+  background: url(./doc.png) 15px 1px no-repeat;
+}
+.animation {
+  background: url(./folder.png) 15px 1px no-repeat;
+}
+
+/* States */
 .selected {
   background-color: #ff91b7;
 }
