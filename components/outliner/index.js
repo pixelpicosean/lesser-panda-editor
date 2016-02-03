@@ -9,6 +9,8 @@ const patch = snabbdom.init([
   require('editor/snabbdom/modules/eventlisteners'),
 ]);
 
+import s from './style.css';
+
 
 export default (container, model$, doAction) => {
   // Actions
@@ -18,14 +20,14 @@ export default (container, model$, doAction) => {
   // View
   const EMPTY = [];
 
-  const viewObj = (obj) => h('li', { on: { click: [select, obj.id] } }, [
-    h('div.leaf', obj.name || 'object'),
-    h('ul.children', obj.children || EMPTY),
-  ]);
-
   const view = (model) => h('section.outliner', [
     h('header', 'Outliner'),
-    h('ul', model.objs.map(viewObj)),
+    h('ul', model.objs.map((obj) =>
+      h(`li${model.selected === obj.id ? '.' + s.selected : ''}`, { on: { click: [select, obj.id] } }, [
+        h('div.leaf', obj.name || 'object'),
+        h('ul.children', obj.children || EMPTY),
+      ])
+    )),
   ]);
 
   // Update view based on model changes
