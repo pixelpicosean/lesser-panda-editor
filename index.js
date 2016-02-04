@@ -2,11 +2,22 @@ import outliner from './components/outliner';
 
 import R from 'engine/reactive';
 import EventEmitter from 'engine/eventemitter3';
+import Immutable from './immutable';
 
-import './reset.css';
+import snabbdom from 'editor/snabbdom';
+const patch = snabbdom.init([
+  require('editor/snabbdom/modules/class'),
+  require('editor/snabbdom/modules/props'),
+  require('editor/snabbdom/modules/eventlisteners'),
+]);
+import h from 'editor/snabbdom/h';
 
-// Model
-const init = () => ({
+import './style.css';
+
+const initContext = () => ({
+  selected: 1,
+});
+const initData = () => ({
   children: [
     {
       id: 0,
@@ -34,27 +45,40 @@ const init = () => ({
       children: [],
     },
   ],
-  selected: 1,
+});
+const init = () => Immutable.fromJS({
+  context: initContext(),
+  data: initData(),
 });
 
-// TODO: register actions the Blender way
-const update = (model, { action, param }) => {
-  switch (action) {
-    case 'SELECT':
-      model.selected = param;
-      console.log(`select: ${model.selected}`);
-      break;
-  }
 
-  return model;
+// Operators
+const ops = {
+  SELECT: (model, param) => model.updateIn(['context', 'selected'], param),
 };
 
-let doAction;
+export default elm => {
+  let operate;
 
-const model$ = R.stream(e => {
-    doAction = (action, param) => e.emit({ action, param });
-  })
-  .scan(update, init())
-  .onValue(() => 0);
+  const view = (model) => h('section.editor', [
+    outliner(model, operate),
+  ]);
 
-export default elm => outliner(elm, model$, doAction);
+  R.stream((e) => operate = (action, param) => e.emit({ action, param }))
+    // Update
+    .scan((model, op) => {
+      if (ops.hasOwnProperty(op.action)) {
+        return ops[op.action](model, op.param);
+      }
+      else {
+        console.log(`WARNING: operator "${op.action}" not found`);
+        return model;
+      }
+    }, init())
+    // View
+    .map(view)
+    // Apply to editor element
+    .scan(patch, elm)
+    // Active the stream
+    .onValue(() => 0);
+};

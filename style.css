@@ -1,3 +1,4 @@
+/* Reset */
 html, body {
   margin: 0;
   padding: 0;
@@ -13,4 +14,10 @@ img {
 
 body, input, select, textarea {
   font-size: 1em;
+}
+
+/* Layout */
+body {
+  display: flex;
+  flex-direction: row;
 }
