@@ -1,4 +1,6 @@
-import outliner from './components/outliner';
+import Renderer from 'engine/renderer';
+import config from 'game/config';
+config.resizeMode = 'dom';
 
 import R from 'engine/reactive';
 import EventEmitter from 'engine/eventemitter3';
@@ -12,7 +14,9 @@ const patch = snabbdom.init([
 ]);
 import h from 'editor/snabbdom/h';
 
-import './style.css';
+import outliner from './components/outliner';
+
+import css from './style.css';
 
 const initContext = () => ({
   selected: 1,
@@ -54,13 +58,14 @@ const init = () => Immutable.fromJS({
 
 // Operators
 const ops = {
-  SELECT: (model, param) => model.updateIn(['context', 'selected'], param),
+  SELECT: (model, param) => model.setIn(['context', 'selected'], param),
 };
 
 export default elm => {
   let operate;
 
-  const view = (model) => h('section.editor', [
+  const view = (model) => h(`section.${css.sidebar}`, [
+    outliner(model, operate),
     outliner(model, operate),
   ]);
 
@@ -81,4 +86,6 @@ export default elm => {
     .scan(patch, elm)
     // Active the stream
     .onValue(() => 0);
+
+  Renderer.resize(100, 100);
 };

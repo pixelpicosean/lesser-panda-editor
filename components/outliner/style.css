@@ -1,3 +1,7 @@
+.outliner {
+  flex: 1;
+}
+
 .tree {
   padding: 0 0 0 20px;
 }
