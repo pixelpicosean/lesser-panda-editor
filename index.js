@@ -20,6 +20,7 @@ import css from './style.css';
 
 const initContext = () => ({
   selected: 1,
+  nextId: 4,
 });
 const initData = () => ({
   children: [
@@ -59,17 +60,30 @@ const init = () => Immutable.fromJS({
 // Operators
 const ops = {
   SELECT: (model, param) => model.setIn(['context', 'selected'], param),
+
+  CREATE: (model, param) => {
+    let nextId = model.getIn(['context', 'nextId']);
+    return model.setIn(['context', 'nextId'], nextId + 1)
+      .updateIn(['data', 'children'], (arr) => arr.push(Immutable.fromJS({
+        id: nextId,
+        type: 'sprite',
+        name: 'object',
+        children: [],
+      })));
+  },
 };
 
-export default elm => {
-  let operate;
 
+let operate;
+const actions$ = R.stream((e) => operate = (action, param) => e.emit({ action, param }));
+
+const editor = (elm) => {
   const view = (model) => h(`section.${css.sidebar}`, [
     outliner(model, operate),
     outliner(model, operate),
   ]);
 
-  R.stream((e) => operate = (action, param) => e.emit({ action, param }))
+  actions$
     // Update
     .scan((model, op) => {
       if (ops.hasOwnProperty(op.action)) {
@@ -85,7 +99,23 @@ export default elm => {
     // Apply to editor element
     .scan(patch, elm)
     // Active the stream
-    .onValue(() => 0);
+    .onValue(() => 0);;
 
   Renderer.resize(100, 100);
 };
+
+import engine from 'engine/core';
+import Scene from 'engine/scene';
+import Timer from 'engine/timer';
+
+class Editor extends Scene {
+  constructor() {
+    super();
+
+    editor(document.getElementById('container'));
+  }
+  awake() {
+    Timer.later(2000, () => operate('CREATE', 'sprite'));
+  }
+};
+engine.addScene('Editor', Editor);
