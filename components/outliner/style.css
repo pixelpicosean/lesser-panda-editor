@@ -59,6 +59,21 @@
   padding-left: 37px;
 }
 
+/* Theme */
+.outliner {
+  background-color: rgb(37, 37, 37);
+  color: #9f9f9f;
+}
+
+.outliner > header {
+  font-size: 16px;
+}
+
+.tree {
+  background-color: #1d1d1d;
+  font-family: Roboto, HelveticaNeue-Light, 'Helvetica Neue', HelveticaNeue, Helvetica, Arial, Geneva, sans-serif;
+}
+
 /* Icon of different objects */
 .sprite {
   background: url(./doc.png) 15px 1px no-repeat;
@@ -69,5 +84,6 @@
 
 /* States */
 .selected {
-  background-color: #ff91b7;
+  color: #f0f0f0;
+  background-color: rgba(56, 179, 246, 0.2);
 }
