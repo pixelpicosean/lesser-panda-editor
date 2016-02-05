@@ -66,3 +66,21 @@ body {
 .sidebar {
   font-family: Roboto, HelveticaNeue-Light, 'Helvetica Neue', HelveticaNeue, Helvetica, Arial, Geneva, sans-serif;
 }
+
+::selection {
+  color: white;
+  background: #38b3f6;
+}
+
+* ::-webkit-scrollbar, ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+* ::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb {
+  background: #313131;
+}
+
+* ::-webkit-scrollbar-track, ::-webkit-scrollbar-track {
+  background: #252525;
+}
