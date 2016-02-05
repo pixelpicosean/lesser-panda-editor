@@ -4,7 +4,6 @@ config.resizeMode = 'dom';
 
 import R from 'engine/reactive';
 import EventEmitter from 'engine/eventemitter3';
-import Immutable from './immutable';
 
 import snabbdom from 'editor/snabbdom';
 const patch = snabbdom.init([
@@ -14,70 +13,74 @@ const patch = snabbdom.init([
 ]);
 import h from 'editor/snabbdom/h';
 
+import css from './style.css';
+
+// Model
+import context from './context';
+import data from './data';
+
+// Components
 import outliner from './components/outliner';
 import inspector from './components/inspector';
 
-import css from './style.css';
-
-const initContext = () => ({
-  selected: 1,
-  nextId: 4,
+const init = () => ({
+  context: context(),
+  data: data(),
 });
-const initData = () => ({
-  children: [
-    {
-      id: 0,
-      type: 'sprite',
-      name: 'sky',
-      children: [],
-    },
-    {
-      id: 1,
-      type: 'sprite',
-      name: 'ground',
-      children: [
-        {
-          id: 2,
-          type: 'sprite',
-          name: 'coin',
-          children: [],
-        },
-      ],
-    },
-    {
-      id: 3,
-      type: 'animation',
-      name: 'mario',
-      children: [],
-    },
-  ],
-});
-const init = () => Immutable.fromJS({
-  context: initContext(),
-  data: initData(),
-});
-
 
 // Operators
 const ops = {
-  SELECT: (model, param) => model.setIn(['context', 'selected'], param),
+  object: {
+    SELECT: (model, param) => {
+      model.context.selected = param;
 
-  CREATE: (model, param) => {
-    let nextId = model.getIn(['context', 'nextId']);
-    return model.setIn(['context', 'nextId'], nextId + 1)
-      .updateIn(['data', 'children'], (arr) => arr.push(Immutable.fromJS({
-        id: nextId,
-        type: 'sprite',
-        name: 'object',
+      return model;
+    },
+
+    ADD: (model, { type, name }) => {
+      // Create object instance
+      const obj = {
+        id: model.data.nextObjectId(),
+        type: type,
+        name: name,
         children: [],
-      })));
+      };
+
+      // Save to object store
+      model.data.objectStore[obj.id] = obj;
+
+      // Add as child of current selected object
+      let parent = model.data.getObjectById(model.context.selected);
+      if (parent) {
+        parent.children.push(obj.id);
+      }
+      // Add to root is no object is selected
+      else {
+        model.data.children.push(obj.id);
+      }
+
+      return model;
+    },
   },
 };
 
+// Operation dispatcher
+let emitter;
+const index = (o, i) => (o ? o[i] : undefined);
+const operate = (actStr, param) => {
+  let action = actStr.split('.').reduce(index, ops);
+  if (action) {
+    emitter.emit({ action, param });
+  }
+  else {
+    emitter.error(`WARNING: operator "${actStr}" not found`);
+  }
+};
 
-let operate;
-const actions$ = R.stream((e) => operate = (action, param) => e.emit({ action, param }));
+// Action stream
+const actions$ = R.stream(e => emitter = e);
 
+// Editor factory
 const editor = (elm) => {
 
   // Editor view
@@ -86,29 +89,23 @@ const editor = (elm) => {
     inspector(model, operate),
   ]);
 
+  // Logic stream
   actions$
     // Update
-    .scan((model, op) => {
-      if (ops.hasOwnProperty(op.action)) {
-        return ops[op.action](model, op.param);
-      }
-      else {
-        console.log(`WARNING: operator "${op.action}" not found`);
-        return model;
-      }
-    }, init())
+    .scan((model, op) => op.action(model, op.param), init())
     // View
     .map(view)
     // Apply to editor element
     .scan(patch, elm)
-    // Active the stream
-    .onValue(() => 0);;
+    // Logging
+    .onError(err => console.log(err));
 
   // Fix canvas style issue
   Renderer.resize(100, 100);
 
 };
 
+// Editor scene
 import engine from 'engine/core';
 import Scene from 'engine/scene';
 import Timer from 'engine/timer';
@@ -120,7 +117,19 @@ class Editor extends Scene {
     editor(document.getElementById('container'));
   }
   awake() {
-    Timer.later(2000, () => operate('CREATE', 'sprite'));
+    const names = ['A', 'B', 'C', 'D', 'E', 'F'];
+    let count = 5;
+    let t = Timer.interval(1000, () => {
+      if (count-- <= 0) {
+        Timer.remove(t);
+      }
+      else {
+        operate('object.ADD', {
+          type: 'sprite',
+          name: names[count],
+        });
+      }
+    });
   }
 };
 engine.addScene('Editor', Editor);
