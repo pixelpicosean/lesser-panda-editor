@@ -3,7 +3,12 @@
 }
 
 .outliner > header {
-  text-align: center;
+  font-size: 16px;
+  height: 32px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .tree {
@@ -14,6 +19,8 @@
   position: relative;
   margin-left: -15px;
   list-style: none;
+
+  height: 22px;
 }
 
 .tree li input + ol {
@@ -69,16 +76,23 @@
 
 /* Theme */
 .outliner {
-  background-color: rgb(37, 37, 37);
+  background-color: rgb(17, 17, 17);
   color: #9f9f9f;
 }
 
 .outliner > header {
-  font-size: 16px;
+  background-color: #222;
 }
 
 .tree {
   background-color: #1d1d1d;
+
+  font-size: 14px;
+}
+
+.tree li {
+  background-color: #313131;
+  border-bottom: 1px solid #222;
 }
 
 /* Icon of different objects */

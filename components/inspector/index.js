@@ -4,12 +4,47 @@ import css from './style.css';
 
 // View
 const EMPTY = [];
-
 let operate;
+
+const readonly = (key, value) => h(`div.${css.prop}`, [
+  h(`div.${css.key}`, key),
+  h(`input.${css.value}.${css.readonly}`, {
+    props: {
+      type: 'text',
+      value: value,
+    },
+    attrs: {
+      readonly: true,
+    },
+  }),
+]);
+
+const text = (key, value) => h(`div.${css.prop}`, [
+  h(`div.${css.key}`, key),
+  h(`input.${css.value}.${css.text}`, {
+    props: {
+      type: 'text',
+      value: value,
+    },
+  }),
+]);
+
+const number = (key, value) => h(`div.${css.prop}`, [
+  h(`div.${css.key}`, key),
+  h(`input.${css.value}.${css.number}`, {
+    props: {
+      type: 'number',
+      value: value,
+    },
+  }),
+]);
 
 const views = {
   'sprite': (sprite, op) => ([
-    h(`label`, 'Name:'), h(`label`, sprite.name),
+    readonly('type', sprite.type),
+    text('name', sprite.name),
+    number('x', 100),
+    number('y', 64),
   ]),
 };
 
