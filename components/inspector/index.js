@@ -6,7 +6,7 @@ import css from './style.css';
 const EMPTY = [];
 let operate;
 
-const readonly = (key, value) => h(`div.${css.prop}`, [
+const readonly = (key, value) => h(`li.${css.prop}`, [
   h(`div.${css.key}`, key),
   h(`input.${css.value}.${css.readonly}`, {
     props: {
@@ -19,7 +19,7 @@ const readonly = (key, value) => h(`div.${css.prop}`, [
   }),
 ]);
 
-const text = (key, value) => h(`div.${css.prop}`, [
+const text = (key, value) => h(`li.${css.prop}`, [
   h(`div.${css.key}`, key),
   h(`input.${css.value}.${css.text}`, {
     props: {
@@ -29,7 +29,7 @@ const text = (key, value) => h(`div.${css.prop}`, [
   }),
 ]);
 
-const number = (key, value) => h(`div.${css.prop}`, [
+const number = (key, value) => h(`li.${css.prop}`, [
   h(`div.${css.key}`, key),
   h(`input.${css.value}.${css.number}`, {
     props: {
@@ -44,6 +44,14 @@ const views = {
     readonly('type', sprite.type),
     text('name', sprite.name),
     number('x', 100),
+    number('y', 64),
+    number('y', 64),
+    number('y', 64),
+    number('y', 64),
+    number('y', 64),
+    number('y', 64),
+    number('y', 64),
+    number('y', 64),
     number('y', 64),
   ]),
 };

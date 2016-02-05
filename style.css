@@ -56,8 +56,7 @@ body {
 
 .sidebar {
   width: 200px;
-
-  overflow-y: scroll;
+  height: 100%;
 
   display: flex;
   flex-direction: column;

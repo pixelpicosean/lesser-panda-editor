@@ -1,5 +1,8 @@
 .outliner {
-  flex: 1;
+  height: 50%;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .outliner > header {
@@ -12,6 +15,10 @@
 }
 
 .tree {
+  flex: 1;
+
+  overflow-y: scroll;
+
   padding: 0 0 0 20px;
 }
 
