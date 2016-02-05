@@ -28,9 +28,10 @@ import './ops/object';
 import outliner from './components/outliner';
 import inspector from './components/inspector';
 
-const init = () => ({
+const init = (view2d) => ({
   context: context(),
   data: data(),
+  view2d: view2d,
 });
 
 // Operation dispatcher
@@ -50,7 +51,7 @@ const operate = (actStr, param) => {
 const actions$ = R.stream(e => emitter = e);
 
 // Editor factory
-const editor = (elm) => {
+const editor = (elm, view2d) => {
 
   // Editor view
   const view = (model) => h(`section.${css.sidebar}`, [
@@ -61,7 +62,7 @@ const editor = (elm) => {
   // Logic stream
   actions$
     // Update
-    .scan((model, op) => op.action(model, op.param), init())
+    .scan((model, op) => op.action(model, op.param), init(view2d))
     // View
     .map(view)
     // Apply to editor element
@@ -77,18 +78,32 @@ const editor = (elm) => {
 // Editor scene
 import engine from 'engine/core';
 import Scene from 'engine/scene';
+import PIXI from 'engine/pixi';
 import Timer from 'engine/timer';
 
 class Editor extends Scene {
   constructor() {
     super();
 
-    editor(document.getElementById('container'));
+    // Layers
+    this.bgLayer = new PIXI.Container().addTo(this.stage);
+    this.objLayer = new PIXI.Container().addTo(this.stage);
+    this.uiLayer = new PIXI.Container().addTo(this.stage);
+
+    // Map of object instances
+    this.instMap = {};
+
+    editor(document.getElementById('container'), this);
   }
   awake() {
     operate('object.ADD', {
       type: 'Text',
-      name: 'gameOverText',
+      name: 'info_text',
+      x: 40,
+      y: 200,
+      font: 'bold 64px Arial',
+      fill: 'white',
+      text: 'It Works!',
     });
     operate('object.ADD', {
       type: 'Container',
@@ -111,6 +126,69 @@ class Editor extends Scene {
       type: 'Sprite',
       name: 'menuFlappy',
     });
+
+    operate('object.SELECT', 0);
+
+    console.log(this.instMap);
+  }
+
+  // APIs
+  add(objModel) {
+    this.instMap[objModel.id] = this['create' + objModel.type](objModel);
+  }
+
+  // Instance factory
+  createContainer(obj) {
+    let inst = new PIXI.Container().addTo(this.objLayer);
+
+    inst.id = obj.id;
+    inst.type = obj.type;
+    inst.name = obj.name;
+    inst.position.set(obj.x, obj.y);
+    inst.rotation = obj.rotation;
+    inst.scale.set(obj.scaleX, obj.scaleY);
+    inst.alpha = obj.alpha;
+    inst.pivot.set(obj.pivotX, obj.pivotY);
+    inst.skew.set(obj.skewX, obj.skewY);
+    inst.visible = obj.visible;
+
+    return inst;
+  }
+  createSprite(obj) {
+    let inst = new PIXI.Sprite().addTo(this.objLayer);
+
+    inst.id = obj.id;
+    inst.type = obj.type;
+    inst.name = obj.name;
+    inst.position.set(obj.x, obj.y);
+    inst.rotation = obj.rotation;
+    inst.scale.set(obj.scaleX, obj.scaleY);
+    inst.alpha = obj.alpha;
+    inst.anchor.set(obj.anchorX, obj.anchorY);
+    inst.pivot.set(obj.pivotX, obj.pivotY);
+    inst.skew.set(obj.skewX, obj.skewY);
+    inst.visible = obj.visible;
+
+    return inst;
+  }
+  createText(obj) {
+    let inst = new PIXI.Text(obj.text, {
+      font: obj.font,
+      fill: obj.fill,
+    }, window.devicePixelRatio).addTo(this.objLayer);
+
+    inst.id = obj.id;
+    inst.type = obj.type;
+    inst.name = obj.name;
+    inst.position.set(obj.x, obj.y);
+    inst.rotation = obj.rotation;
+    inst.scale.set(obj.scaleX, obj.scaleY);
+    inst.alpha = obj.alpha;
+    inst.pivot.set(obj.pivotX, obj.pivotY);
+    inst.skew.set(obj.skewX, obj.skewY);
+    inst.visible = obj.visible;
+
+    return inst;
   }
 };
 engine.addScene('Editor', Editor);

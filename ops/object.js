@@ -22,13 +22,13 @@ const createSprite = (model, { name, x, y, texture }) => (Object.assign(createCo
   texture: texture,
 }));
 
-const createText = (model, { name, x, y, text }) => (Object.assign(createContainer(model, { name, x, y }), {
+const createText = (model, { name, x, y, text, font, fill }) => (Object.assign(createContainer(model, { name, x, y }), {
   type: 'Text',
   anchorX: 0, anchorY: 0,
   blendMode: 'NORMAL',
   text: text || 'text',
-  font: 'bold 20px Arial',
-  fill: 'black',
+  font: font || 'bold 20px Arial',
+  fill: fill || 'black',
 }));
 
 const factoryMethods = {
@@ -61,6 +61,9 @@ ops.object = {
     else {
       model.data.children.push(obj.id);
     }
+
+    // Create a instance and add it to view2d
+    model.view2d.add(obj);
 
     return model;
   },
