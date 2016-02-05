@@ -2,6 +2,10 @@
   flex: 1;
 }
 
+.outliner > header {
+  text-align: center;
+}
+
 .tree {
   padding: 0 0 0 20px;
 }
@@ -75,7 +79,6 @@
 
 .tree {
   background-color: #1d1d1d;
-  font-family: Roboto, HelveticaNeue-Light, 'Helvetica Neue', HelveticaNeue, Helvetica, Arial, Geneva, sans-serif;
 }
 
 /* Icon of different objects */

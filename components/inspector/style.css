@@ -1,0 +1,21 @@
+.inspector {
+  flex: 1;
+}
+
+.inspector > header {
+  text-align: center;
+}
+
+/* Theme */
+.inspector {
+  background-color: rgb(37, 37, 37);
+  color: #9f9f9f;
+}
+
+.inspector > header {
+  font-size: 16px;
+}
+
+.tree {
+  background-color: #1d1d1d;
+}

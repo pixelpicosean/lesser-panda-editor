@@ -15,6 +15,7 @@ const patch = snabbdom.init([
 import h from 'editor/snabbdom/h';
 
 import outliner from './components/outliner';
+import inspector from './components/inspector';
 
 import css from './style.css';
 
@@ -78,9 +79,11 @@ let operate;
 const actions$ = R.stream((e) => operate = (action, param) => e.emit({ action, param }));
 
 const editor = (elm) => {
+
+  // Editor view
   const view = (model) => h(`section.${css.sidebar}`, [
     outliner(model, operate),
-    outliner(model, operate),
+    inspector(model, operate),
   ]);
 
   actions$
@@ -101,7 +104,9 @@ const editor = (elm) => {
     // Active the stream
     .onValue(() => 0);;
 
+  // Fix canvas style issue
   Renderer.resize(100, 100);
+
 };
 
 import engine from 'engine/core';
