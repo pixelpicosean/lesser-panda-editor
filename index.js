@@ -119,26 +119,26 @@ class Editor extends Scene {
   }
   awake() {
     operate('object.ADD', {
-      type: 'sprite',
+      type: 'Sprite',
       name: 'gameOverText',
     });
     operate('object.ADD', {
-      type: 'sprite',
+      type: 'Sprite',
       name: 'scoreBoard',
     });
     operate('object.ADD', {
-      type: 'sprite',
+      type: 'Sprite',
       name: 'playBtn',
     });
     operate('object.ADD', {
-      type: 'sprite',
+      type: 'Sprite',
       name: 'title',
     });
 
     operate('object.SELECT', 3);
 
     operate('object.ADD', {
-      type: 'sprite',
+      type: 'Sprite',
       name: 'menuFlappy',
     });
   }

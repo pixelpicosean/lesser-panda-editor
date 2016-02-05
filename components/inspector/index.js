@@ -40,7 +40,7 @@ const number = (key, value) => h(`li.${css.prop}`, [
 ]);
 
 const views = {
-  'sprite': (sprite, op) => ([
+  'Sprite': (sprite, op) => ([
     readonly('type', sprite.type),
     text('name', sprite.name),
     number('pos.x', 100),
