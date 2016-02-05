@@ -19,32 +19,40 @@ const readonly = (key, value) => h(`li.${css.prop}`, [
   }),
 ]);
 
-const text = (key, value) => h(`li.${css.prop}`, [
-  h(`div.${css.key}`, key),
-  h(`input.${css.value}.${css.text}`, {
-    props: {
-      type: 'text',
-      value: value,
-    },
-  }),
-]);
+const text = (key, value) => {
+  const changed = (e) => operate('object.UPDATE', [key, e.target.value]);
+  return h(`li.${css.prop}`, [
+    h(`div.${css.key}`, key),
+    h(`input.${css.value}.${css.text}`, {
+      props: {
+        type: 'text',
+        value: value,
+      },
+      on: { change: changed },
+    }),
+  ]);
+};
 
-const number = (key, value) => h(`li.${css.prop}`, [
-  h(`div.${css.key}`, key),
-  h(`input.${css.value}.${css.number}`, {
-    props: {
-      type: 'number',
-      value: value,
-    },
-  }),
-]);
+const number = (key, value) => {
+  const changed = (e) => operate('object.UPDATE', [key, e.target.value]);
+  return h(`li.${css.prop}`, [
+    h(`div.${css.key}`, key),
+    h(`input.${css.value}.${css.number}`, {
+      props: {
+        type: 'number',
+        value: value,
+      },
+      on: { change: changed },
+    }),
+  ]);
+};
 
 const views = {
   Container: (c, op) =>([
     readonly('type', c.type),
     text('name', c.name),
-    number('pos.x', c.x),
-    number('pos.y', c.y),
+    number('x', c.x),
+    number('y', c.y),
     number('rotation', c.rotation),
     number('scale.x', c.scale.x),
     number('scale.y', c.scale.y),
@@ -59,8 +67,8 @@ const views = {
   Sprite: (sprite, op) => ([
     readonly('type', sprite.type),
     text('name', sprite.name),
-    number('pos.x', sprite.x),
-    number('pos.y', sprite.y),
+    number('x', sprite.x),
+    number('y', sprite.y),
     number('rotation', sprite.rotation),
     number('scale.x', sprite.scale.x),
     number('scale.y', sprite.scale.y),
@@ -78,10 +86,10 @@ const views = {
     readonly('type', t.type),
     text('name', t.name),
     text('text', t.text),
-    text('font', t.font),
-    text('fill', t.fill),
-    number('pos.x', t.x),
-    number('pos.y', t.y),
+    text('style.font', t.style.font),
+    text('style.fill', t.style.fill),
+    number('x', t.x),
+    number('y', t.y),
     number('rotation', t.rotation),
     number('scale.x', t.scale.x),
     number('scale.y', t.scale.y),

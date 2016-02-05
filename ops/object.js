@@ -22,13 +22,15 @@ const createSprite = (model, { name, x, y, texture }) => (Object.assign(createCo
   texture: texture,
 }));
 
-const createText = (model, { name, x, y, text, font, fill }) => (Object.assign(createContainer(model, { name, x, y }), {
+const createText = (model, { name, x, y, text, style = {} }) => (Object.assign(createContainer(model, { name, x, y }), {
   type: 'Text',
   anchor: { x: 0, y: 0 },
   blendMode: 'NORMAL',
   text: text || 'text',
-  font: font || 'bold 20px Arial',
-  fill: fill || 'black',
+  style: {
+    font: style.font || 'bold 20px Arial',
+    fill: style.fill || 'black',
+  },
 }));
 
 const factoryMethods = {

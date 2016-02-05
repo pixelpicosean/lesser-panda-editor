@@ -101,8 +101,10 @@ class Editor extends Scene {
       name: 'info_text',
       x: 40,
       y: 200,
-      font: 'bold 64px Arial',
-      fill: 'white',
+      style: {
+        font: 'bold 64px Arial',
+        fill: 'white',
+      },
       text: 'It Works!',
     });
     operate('object.ADD', {
@@ -128,13 +130,6 @@ class Editor extends Scene {
     });
 
     operate('object.SELECT', 0);
-
-    Timer.later(2000, () => {
-      operate('object.UPDATE', ['y', 300]);
-    });
-    Timer.later(4000, () => {
-      operate('object.UPDATE', ['pivot.y', 40]);
-    });
   }
 
   // APIs
@@ -180,10 +175,7 @@ class Editor extends Scene {
     return inst;
   }
   createText(obj) {
-    let inst = new PIXI.Text(obj.text, {
-      font: obj.font,
-      fill: obj.fill,
-    }, window.devicePixelRatio).addTo(this.objLayer);
+    let inst = new PIXI.Text(obj.text, obj.style, window.devicePixelRatio).addTo(this.objLayer);
 
     inst.id = obj.id;
     inst.type = obj.type;
