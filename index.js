@@ -29,6 +29,33 @@ const init = () => ({
   data: data(),
 });
 
+let nextObjNameIdx = 0;
+const createContainer = (model, { name, x, y }) => ({
+  id: model.data.nextObjectId(),
+  type: 'Container',
+  name: name || ('object_' + (nextObjNameIdx++)),
+  children: [],
+  x: x || 0, y: y || 0,
+  rotation: 0,
+  scaleX: 1, scaleY: 1,
+  alpha: 1,
+  pivotX: 0, pivotY: 0,
+  skewX: 0, skewY: 0,
+  visible: true,
+});
+
+const createSprite = (model, { name, x, y, texture }) => (Object.assign(createContainer(model, { name, x, y }), {
+  type: 'Sprite',
+  anchorX: 0, anchorY: 0,
+  blendMode: 'NORMAL',
+  texture: texture,
+}));
+
+const factoryMethods = {
+  'Container': createContainer,
+  'Sprite': createSprite,
+};
+
 // Operators
 const ops = {
   object: {
@@ -38,14 +65,9 @@ const ops = {
       return model;
     },
 
-    ADD: (model, { type, name }) => {
+    ADD: (model, param) => {
       // Create object instance
-      const obj = {
-        id: model.data.nextObjectId(),
-        type: type,
-        name: name,
-        children: [],
-      };
+      const obj = factoryMethods[param.type](model, param);
 
       // Save to object store
       model.data.objectStore[obj.id] = obj;
@@ -123,8 +145,10 @@ class Editor extends Scene {
       name: 'gameOverText',
     });
     operate('object.ADD', {
-      type: 'Sprite',
+      type: 'Container',
       name: 'scoreBoard',
+      x: 100,
+      y: 20,
     });
     operate('object.ADD', {
       type: 'Sprite',
@@ -141,6 +165,16 @@ class Editor extends Scene {
       type: 'Sprite',
       name: 'menuFlappy',
     });
+
+    operate('object.SELECT', -1);
+    for (let i = 0; i < 10; i++) {
+      operate('object.ADD', {
+        type: 'Sprite',
+      });
+      operate('object.ADD', {
+        type: 'Container',
+      });
+    }
   }
 };
 engine.addScene('Editor', Editor);
