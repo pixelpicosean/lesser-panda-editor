@@ -9,6 +9,7 @@ import snabbdom from 'editor/snabbdom';
 const patch = snabbdom.init([
   require('editor/snabbdom/modules/class'),
   require('editor/snabbdom/modules/props'),
+  require('editor/snabbdom/modules/attributes'),
   require('editor/snabbdom/modules/eventlisteners'),
 ]);
 import h from 'editor/snabbdom/h';
@@ -117,18 +118,28 @@ class Editor extends Scene {
     editor(document.getElementById('container'));
   }
   awake() {
-    const names = ['A', 'B', 'C', 'D', 'E', 'F'];
-    let count = 5;
-    let t = Timer.interval(1000, () => {
-      if (count-- <= 0) {
-        Timer.remove(t);
-      }
-      else {
-        operate('object.ADD', {
-          type: 'sprite',
-          name: names[count],
-        });
-      }
+    operate('object.ADD', {
+      type: 'sprite',
+      name: 'gameOverText',
+    });
+    operate('object.ADD', {
+      type: 'sprite',
+      name: 'scoreBoard',
+    });
+    operate('object.ADD', {
+      type: 'sprite',
+      name: 'playBtn',
+    });
+    operate('object.ADD', {
+      type: 'sprite',
+      name: 'title',
+    });
+
+    operate('object.SELECT', 3);
+
+    operate('object.ADD', {
+      type: 'sprite',
+      name: 'menuFlappy',
     });
   }
 };
