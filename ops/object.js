@@ -22,9 +22,19 @@ const createSprite = (model, { name, x, y, texture }) => (Object.assign(createCo
   texture: texture,
 }));
 
+const createText = (model, { name, x, y, text }) => (Object.assign(createContainer(model, { name, x, y }), {
+  type: 'Text',
+  anchorX: 0, anchorY: 0,
+  blendMode: 'NORMAL',
+  text: text || 'text',
+  font: 'bold 20px Arial',
+  fill: 'black',
+}));
+
 const factoryMethods = {
-  'Container': createContainer,
-  'Sprite': createSprite,
+  Container: createContainer,
+  Sprite: createSprite,
+  Text: createText,
 };
 
 // Add operators to "object" namespace

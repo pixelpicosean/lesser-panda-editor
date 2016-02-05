@@ -73,6 +73,27 @@ const views = {
     number('skew.y', sprite.skewY),
     // toggle('visible', true),
   ]),
+
+  Text: (t, op) => ([
+    readonly('type', t.type),
+    text('name', t.name),
+    text('text', t.text),
+    text('font', t.font),
+    text('fill', t.fill),
+    number('pos.x', t.x),
+    number('pos.y', t.y),
+    number('rotation', t.rotation),
+    number('scale.x', t.scaleX),
+    number('scale.y', t.scaleY),
+    number('alpha', t.alpha),
+    number('anchor.x', t.pivotX),
+    number('anchor.y', t.pivotY),
+    number('pivot.x', t.pivotX),
+    number('pivot.y', t.pivotY),
+    number('skew.x', t.skewX),
+    number('skew.y', t.skewY),
+    // toggle('visible', true),
+  ]),
 };
 
 const view = (obj, op) => {

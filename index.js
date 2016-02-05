@@ -87,7 +87,7 @@ class Editor extends Scene {
   }
   awake() {
     operate('object.ADD', {
-      type: 'Sprite',
+      type: 'Text',
       name: 'gameOverText',
     });
     operate('object.ADD', {
@@ -111,16 +111,6 @@ class Editor extends Scene {
       type: 'Sprite',
       name: 'menuFlappy',
     });
-
-    operate('object.SELECT', -1);
-    for (let i = 0; i < 10; i++) {
-      operate('object.ADD', {
-        type: 'Sprite',
-      });
-      operate('object.ADD', {
-        type: 'Container',
-      });
-    }
   }
 };
 engine.addScene('Editor', Editor);

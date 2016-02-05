@@ -103,12 +103,13 @@
 }
 
 /* Icon of different objects */
-.sprite {
+.Sprite {
   background: url(./doc.png) 15px 1px no-repeat;
 }
-.animation {
+.Container {
   background: url(./folder.png) 15px 1px no-repeat;
 }
+.Text {}
 
 /* States */
 .selected {
