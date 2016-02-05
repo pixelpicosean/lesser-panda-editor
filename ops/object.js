@@ -8,23 +8,23 @@ const createContainer = (model, { name, x, y }) => ({
   children: [],
   x: x || 0, y: y || 0,
   rotation: 0,
-  scaleX: 1, scaleY: 1,
+  scale: { x: 1, y: 1 },
   alpha: 1,
-  pivotX: 0, pivotY: 0,
-  skewX: 0, skewY: 0,
+  pivot: { x: 0, y: 0 },
+  skew: { x: 0, y: 0 },
   visible: true,
 });
 
 const createSprite = (model, { name, x, y, texture }) => (Object.assign(createContainer(model, { name, x, y }), {
   type: 'Sprite',
-  anchorX: 0, anchorY: 0,
+  anchor: { x: 0, y: 0 },
   blendMode: 'NORMAL',
   texture: texture,
 }));
 
 const createText = (model, { name, x, y, text, font, fill }) => (Object.assign(createContainer(model, { name, x, y }), {
   type: 'Text',
-  anchorX: 0, anchorY: 0,
+  anchor: { x: 0, y: 0 },
   blendMode: 'NORMAL',
   text: text || 'text',
   font: font || 'bold 20px Arial',
@@ -64,6 +64,31 @@ ops.object = {
 
     // Create a instance and add it to view2d
     model.view2d.add(obj);
+
+    return model;
+  },
+
+  UPDATE: (model, param) => {
+    // Get model its view2d instance
+    let target = model.data.getObjectById(model.context.selected);
+    let inst = model.view2d.get(target.id);
+
+    // Find property to udpate
+    let keys = param[0].split('.');
+    let field = target;
+    let instField = inst;
+    for (let i = 0; i < keys.length - 1; i++) {
+      field = target[keys[i]];
+      instField = inst[keys[i]];
+    }
+
+    // Apply the change
+    if (keys.length > 1) {
+      field[keys[keys.length - 1]] = instField[keys[keys.length - 1]] = param[1];
+    }
+    else {
+      field[param[0]] = instField[param[0]] = param[1];
+    }
 
     return model;
   },

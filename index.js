@@ -129,12 +129,20 @@ class Editor extends Scene {
 
     operate('object.SELECT', 0);
 
-    console.log(this.instMap);
+    Timer.later(2000, () => {
+      operate('object.UPDATE', ['y', 300]);
+    });
+    Timer.later(4000, () => {
+      operate('object.UPDATE', ['pivot.y', 40]);
+    });
   }
 
   // APIs
   add(objModel) {
     this.instMap[objModel.id] = this['create' + objModel.type](objModel);
+  }
+  get(id) {
+    return this.instMap[id];
   }
 
   // Instance factory
@@ -144,12 +152,12 @@ class Editor extends Scene {
     inst.id = obj.id;
     inst.type = obj.type;
     inst.name = obj.name;
-    inst.position.set(obj.x, obj.y);
+    inst.position.copy(obj);
     inst.rotation = obj.rotation;
-    inst.scale.set(obj.scaleX, obj.scaleY);
+    inst.scale.copy(obj.scale);
     inst.alpha = obj.alpha;
-    inst.pivot.set(obj.pivotX, obj.pivotY);
-    inst.skew.set(obj.skewX, obj.skewY);
+    inst.pivot.copy(obj.pivot);
+    inst.skew.copy(obj.skew);
     inst.visible = obj.visible;
 
     return inst;
@@ -160,13 +168,13 @@ class Editor extends Scene {
     inst.id = obj.id;
     inst.type = obj.type;
     inst.name = obj.name;
-    inst.position.set(obj.x, obj.y);
+    inst.position.copy(obj);
     inst.rotation = obj.rotation;
-    inst.scale.set(obj.scaleX, obj.scaleY);
+    inst.scale.copy(obj.scale);
     inst.alpha = obj.alpha;
-    inst.anchor.set(obj.anchorX, obj.anchorY);
-    inst.pivot.set(obj.pivotX, obj.pivotY);
-    inst.skew.set(obj.skewX, obj.skewY);
+    inst.anchor.copy(obj.anchor);
+    inst.pivot.copy(obj.pivot);
+    inst.skew.copy(obj.skew);
     inst.visible = obj.visible;
 
     return inst;
@@ -180,12 +188,13 @@ class Editor extends Scene {
     inst.id = obj.id;
     inst.type = obj.type;
     inst.name = obj.name;
-    inst.position.set(obj.x, obj.y);
+    inst.position.copy(obj);
     inst.rotation = obj.rotation;
-    inst.scale.set(obj.scaleX, obj.scaleY);
+    inst.scale.copy(obj.scale);
     inst.alpha = obj.alpha;
-    inst.pivot.set(obj.pivotX, obj.pivotY);
-    inst.skew.set(obj.skewX, obj.skewY);
+    inst.anchor.copy(obj.anchor);
+    inst.pivot.copy(obj.pivot);
+    inst.skew.copy(obj.skew);
     inst.visible = obj.visible;
 
     return inst;
