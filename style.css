@@ -10,6 +10,9 @@ html, body {
 
 * {
   box-sizing: border-box;
+
+  margin: 0;
+  padding: 0;
 }
 
 img {
@@ -53,6 +56,8 @@ body {
 
 .sidebar {
   width: 200px;
+
+  overflow-y: scroll;
 
   display: flex;
   flex-direction: column;
