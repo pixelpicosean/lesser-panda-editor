@@ -8,12 +8,24 @@ import ops from 'editor/ops';
 let visible = false;
 
 let operate;
-
 let callback;
-const choose = (param) => {
-  if (typeof(callback) === 'function') callback(param);
-  operate('ui.HIDE_ASSETS');
-};
+
+// Assets
+let images = [];
+
+// Construct a canvas for each frame
+loader.on('complete', () => {
+  let key, res;
+  for (key in loader.resources) {
+    res = loader.resources[key];
+    if (res.isImage) {
+      images.push({
+        key: key,
+        url: res.url,
+      });
+    }
+  }
+});
 
 // Operators
 ops.ui = Object.assign(ops.ui || {}, {
@@ -34,16 +46,28 @@ ops.ui = Object.assign(ops.ui || {}, {
 // View
 const EMPTY = '';
 
-const node = (key) => h(`li.${css.gridNode}`, {
-  on: { click: [choose, key] },
-}, key);
+const choose = (param) => {
+  if (typeof(callback) === 'function') callback(param);
+  operate('ui.HIDE_ASSETS');
+};
+
+const node = (img) => h(`li.${css.gridNode}`, { style: { backgroundImage: `url(${img.url})` }, on: { click: [choose, img.key] } }, [
+  h(`label.${css.label}`, img.key),
+]);
 
 export default (model, op) => {
   operate = op;
 
+  if (!model.data.images) {
+    model.data.images = images;
+  }
+
   return visible ?
     h(`section.${css.modal}`, [
-      h(`ol.${css.typeNav}`),
-      h(`ol.${css.grid}`, Object.keys(loader.resources).map(node)),
+      h(`header`, 'ASSETS'),
+      h(`section.${css.content}`, [
+        h(`ol.${css.typeNav}`),
+        h(`ol.${css.grid}`, images.map(node)),
+      ]),
     ]) : EMPTY;
 }

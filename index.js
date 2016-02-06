@@ -10,6 +10,7 @@ const patch = snabbdom.init([
   require('editor/snabbdom/modules/class'),
   require('editor/snabbdom/modules/props'),
   require('editor/snabbdom/modules/attributes'),
+  require('editor/snabbdom/modules/style'),
   require('editor/snabbdom/modules/eventlisteners'),
 ]);
 import h from 'editor/snabbdom/h';
@@ -112,7 +113,7 @@ class Editor extends Scene {
 
     operate('object.SELECT', 0);
 
-    Timer.later(2000, () => {
+    Timer.later(1000, () => {
       operate('ui.SHOW_ASSETS', (key) => console.log(`asset "${key}" is choosed`));
     });
   }

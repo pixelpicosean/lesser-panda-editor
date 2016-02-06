@@ -1,7 +1,8 @@
 .modal {
   /* Size */
-  width: 80%;
-  height: 80%;
+  width: 90%;
+  height: 90%;
+  max-width: 730px;
 
   /* Align to the center */
   position: absolute;
@@ -10,44 +11,90 @@
   transform: translate(-50%, -50%);
 
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal > header {
+  height: 2em;
+  font-size: 16px;
+  color: #9f9f9f;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
   flex-direction: row;
+
+  padding: 0 8px;
 }
 
 .typeNav {
-  width: 100px;
+  width: 6em;
 }
 .grid {
   flex: 1;
 
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
 
+  padding: 0 4px;
   overflow-y: scroll;
 }
 .gridNode {
-  width: 160px;
-  height: 160px;
+  width: 128px;
+  height: 128px;
 
-  margin: 16px;
+  margin: 8px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+.label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Theme */
 .modal {
-  background-color: #999;
+  background-color: #000;
+  border-radius: 12px;
+  border: 8px solid #222;
 }
 .typeNav {
-  background-color: #ff8;
+  background-color: #222;
 }
-.grid {
-  background-color: #8ff;
-}
-
+.grid {}
 .gridNode {
   background-color: #aaa;
 
   border-radius: 12px;
+  border: 4px solid #555;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+}
+.label {
+  width: 100%;
+  height: 1.6em;
+
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+
+  color: #ccc;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  font-size: 14px;
 }
