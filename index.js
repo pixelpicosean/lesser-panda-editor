@@ -27,6 +27,7 @@ import './ops/object';
 // Components
 import outliner from './components/outliner';
 import inspector from './components/inspector';
+import assetsModal from './components/assets-modal';
 
 const init = (view2d) => ({
   context: context(),
@@ -57,6 +58,7 @@ const editor = (elm, view2d) => {
   const view = (model) => h(`section.${css.sidebar}`, [
     outliner(model, operate),
     inspector(model, operate),
+    assetsModal(model, operate),
   ]);
 
   // Logic stream
@@ -107,32 +109,11 @@ class Editor extends Scene {
       },
       text: 'It Works!',
     });
-    operate('object.ADD', {
-      type: 'Container',
-      name: 'scoreBoard',
-      x: 100,
-      y: 20,
-    });
-    operate('object.ADD', {
-      type: 'Sprite',
-      name: 'playBtn',
-    });
-    operate('object.ADD', {
-      type: 'Sprite',
-      name: 'title',
-    });
-
-    operate('object.SELECT', 3);
-
-    operate('object.ADD', {
-      type: 'Sprite',
-      name: 'menuFlappy',
-    });
 
     operate('object.SELECT', 0);
 
     Timer.later(2000, () => {
-      operate('object.REMOVE');
+      operate('ui.SHOW_ASSETS', (key) => console.log(`asset "${key}" is choosed`));
     });
   }
 

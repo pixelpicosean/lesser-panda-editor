@@ -1,0 +1,53 @@
+.modal {
+  /* Size */
+  width: 80%;
+  height: 80%;
+
+  /* Align to the center */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: row;
+}
+
+.typeNav {
+  width: 100px;
+}
+.grid {
+  flex: 1;
+
+  display: flex;
+  flex-wrap: wrap;
+
+  overflow-y: scroll;
+}
+.gridNode {
+  width: 160px;
+  height: 160px;
+
+  margin: 16px;
+}
+
+/* Theme */
+.modal {
+  background-color: #999;
+}
+.typeNav {
+  background-color: #ff8;
+}
+.grid {
+  background-color: #8ff;
+}
+
+.gridNode {
+  background-color: #aaa;
+
+  border-radius: 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
