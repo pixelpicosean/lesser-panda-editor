@@ -130,14 +130,28 @@ class Editor extends Scene {
     });
 
     operate('object.SELECT', 0);
+
+    Timer.later(2000, () => {
+      operate('object.REMOVE');
+    });
   }
 
   // APIs
   add(objModel) {
     this.instMap[objModel.id] = this['create' + objModel.type](objModel);
   }
+  remove(id) {
+    this.instMap[id].remove();
+    this.instMap[id] = null;
+  }
   get(id) {
     return this.instMap[id];
+  }
+  changeParent(id, newParentId) {
+    let target = this.instMap[id];
+    let parent = newParentId < 0 ? this.objLayer : this.instMap[newParentId]
+
+    parent.addChild(target);
   }
 
   // Instance factory

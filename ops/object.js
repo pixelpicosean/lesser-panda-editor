@@ -1,7 +1,7 @@
 import ops from './index';
 
 let nextObjNameIdx = 0;
-const createContainer = (model, { name, x, y }) => ({
+const createContainer = (model, { name, x, y, parent = -1 }) => ({
   id: model.data.nextObjectId(),
   type: 'Container',
   name: name || ('object_' + (nextObjNameIdx++)),
@@ -13,16 +13,17 @@ const createContainer = (model, { name, x, y }) => ({
   pivot: { x: 0, y: 0 },
   skew: { x: 0, y: 0 },
   visible: true,
+  parent: parent,
 });
 
-const createSprite = (model, { name, x, y, texture }) => (Object.assign(createContainer(model, { name, x, y }), {
+const createSprite = (model, { name, x, y, parent, texture }) => (Object.assign(createContainer(model, { name, x, y, parent }), {
   type: 'Sprite',
   anchor: { x: 0, y: 0 },
   blendMode: 'NORMAL',
   texture: texture,
 }));
 
-const createText = (model, { name, x, y, text, style = {} }) => (Object.assign(createContainer(model, { name, x, y }), {
+const createText = (model, { name, x, y, parent, text, style = {} }) => (Object.assign(createContainer(model, { name, x, y, parent }), {
   type: 'Text',
   anchor: { x: 0, y: 0 },
   blendMode: 'NORMAL',
@@ -37,6 +38,45 @@ const factoryMethods = {
   Container: createContainer,
   Sprite: createSprite,
   Text: createText,
+};
+
+// Default update handler
+const simpleAssign = () => {
+  // Get model and its view2d instance
+  let target = model.data.getObjectById(model.context.selected);
+  let inst = model.view2d.get(target.id);
+
+  // Find property to udpate
+  let keys = param[0].split('.');
+  let field = target;
+  let instField = inst;
+  for (let i = 0; i < keys.length - 1; i++) {
+    field = target[keys[i]];
+    instField = inst[keys[i]];
+  }
+
+  // Apply the change
+  if (keys.length > 1) {
+    field[keys[keys.length - 1]] = instField[keys[keys.length - 1]] = param[1];
+  }
+  else {
+    field[param[0]] = instField[param[0]] = param[1];
+  }
+};
+// Update handlers
+const updateHandlers = {
+  parent: (model, param) => {
+    let target = model.data.getObjectById(model.context.selected);
+    let parent = (target.parent < 0 ? model.data : model.data.getObjectById(target.parent));
+    // Remove from current paretn
+    parent.children.splice(parent.children.indexOf(target.id), 1);
+    // Add to new parent
+    parent = model.data.getObjectById(param);
+    parent.children.push(target.id);
+
+    // Change parent in view2d
+    model.view2d.changeParent(model.context.selected, param);
+  },
 };
 
 // Add operators to "object" namespace
@@ -71,26 +111,23 @@ ops.object = {
   },
 
   UPDATE: (model, param) => {
-    // Get model its view2d instance
-    let target = model.data.getObjectById(model.context.selected);
-    let inst = model.view2d.get(target.id);
-
-    // Find property to udpate
-    let keys = param[0].split('.');
-    let field = target;
-    let instField = inst;
-    for (let i = 0; i < keys.length - 1; i++) {
-      field = target[keys[i]];
-      instField = inst[keys[i]];
-    }
-
-    // Apply the change
-    if (keys.length > 1) {
-      field[keys[keys.length - 1]] = instField[keys[keys.length - 1]] = param[1];
+    if (updateHandlers[param[0]]) {
+      updateHandlers[param[0]](model, param);
     }
     else {
-      field[param[0]] = instField[param[0]] = param[1];
+      simpleAssign(model, param);
     }
+
+    return model;
+  },
+
+  REMOVE: (model) => {
+    // Remove model and instance
+    model.data.removeObject(model.context.selected);
+    model.view2d.remove(model.context.selected);
+
+    // Select nothing
+    model.context.selected = -1;
 
     return model;
   },

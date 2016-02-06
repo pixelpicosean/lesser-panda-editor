@@ -10,6 +10,13 @@ export default () => {
 
     nextObjectId: () => nextObjectId++,
     getObjectById: (id) => data.objectStore[id],
+    removeObject: (id) => {
+      let obj = data.objectStore[id];
+      let parent = obj.parent < 0 ? data : data.objectStore[obj.parent];
+      parent.children.splice(parent.children.indexOf(id), 1);
+
+      delete data.objectStore[id];
+    },
   };
 
   return data;
