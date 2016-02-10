@@ -41,7 +41,7 @@ const factoryMethods = {
 };
 
 // Default update handler
-const simpleAssign = () => {
+const simpleAssign = (model, param) => {
   // Get model and its view2d instance
   let target = model.data.getObjectById(model.context.selected);
   let inst = model.view2d.get(target.id);
