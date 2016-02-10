@@ -84,6 +84,8 @@ import Scene from 'engine/scene';
 import PIXI from 'engine/pixi';
 import Timer from 'engine/timer';
 
+import Mousetrap from './mousetrap';
+
 class Editor extends Scene {
   constructor() {
     super();
@@ -99,6 +101,23 @@ class Editor extends Scene {
     editor(document.getElementById('container'), this);
   }
   awake() {
+    const insertSprite = (key) => {
+      console.log(`insertSprite: ${key}`);
+      operate('object.ADD', {
+        type: 'Sprite',
+        x: 0, y: 0,
+        texture: key,
+      });
+    };
+
+    // Setup shortcuts handlers
+    const add = () => {
+      operate('ui.SHOW_ASSETS', insertSprite);
+    };
+
+    Mousetrap.bind('shift+a', add);
+
+    // Tests
     operate('object.ADD', {
       type: 'Text',
       name: 'info_text',
@@ -112,10 +131,9 @@ class Editor extends Scene {
     });
 
     operate('object.SELECT', 0);
-
-    Timer.later(1000, () => {
-      operate('ui.SHOW_ASSETS', (key) => console.log(`asset "${key}" is choosed`));
-    });
+  }
+  exit() {
+    // Remove shortcut handlers
   }
 
   // APIs
@@ -154,7 +172,7 @@ class Editor extends Scene {
     return inst;
   }
   createSprite(obj) {
-    let inst = new PIXI.Sprite().addTo(this.objLayer);
+    let inst = new PIXI.Sprite(PIXI.Texture.fromAsset(obj.texture)).addTo(this.objLayer);
 
     inst.id = obj.id;
     inst.type = obj.type;
