@@ -95,6 +95,10 @@ class Editor extends Scene {
     this.objLayer = new PIXI.Container().addTo(this.stage);
     this.uiLayer = new PIXI.Container().addTo(this.stage);
 
+    // UI elements
+    this.selectRect = new PIXI.Graphics().addTo(this.uiLayer);
+    this.selectRect.visible = false;
+
     // Map of object instances
     this.instMap = {};
 
@@ -152,6 +156,22 @@ class Editor extends Scene {
     let parent = newParentId < 0 ? this.objLayer : this.instMap[newParentId]
 
     parent.addChild(target);
+  }
+  select(id) {
+    this.updateRectOf(id);
+  }
+  updateRectOf(id) {
+    let target = this.instMap[id];
+    let bounds = target.getLocalBounds();
+    let g = this.selectRect;
+
+    g.clear();
+    g.lineStyle(1, 0x39bdfd);
+    g.drawRect(bounds.x - target.pivot.x, bounds.y - target.pivot.y, bounds.width, bounds.height);
+    g.position.copy(target.position);
+    g.rotation = target.rotation;
+
+    g.visible = true;
   }
 
   // Instance factory

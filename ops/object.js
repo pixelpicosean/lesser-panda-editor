@@ -82,7 +82,12 @@ const updateHandlers = {
 // Add operators to "object" namespace
 ops.object = {
   SELECT: (model, param) => {
+    // Save selected object to context
     model.context.selected = param;
+
+    // Select in view2d
+    // TODO: use some obeserve mechanism instead of directly calling
+    model.view2d.select(param);
 
     return model;
   },
@@ -117,6 +122,9 @@ ops.object = {
     else {
       simpleAssign(model, param);
     }
+
+    // TODO: use obeserver instead of directly calling
+    model.view2d.updateRectOf(model.context.selected);
 
     return model;
   },
