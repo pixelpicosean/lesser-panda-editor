@@ -108,6 +108,7 @@ class AssetsModal {
     this.gridView = new PIXI.Container().addTo(this.modal);
     this.gridMask = new PIXI.Graphics().addTo(this.modal);
     this.gridView.mask = this.gridMask;
+    this.gridContainer = new PIXI.Container().addTo(this.gridView);
 
     this.items = Object.keys(loader.resources).map((key) => {
       // Item rectangle
@@ -115,7 +116,7 @@ class AssetsModal {
       item.beginFill(0xa0a0a0);
       item.drawRoundedRect(0, 0, this.ITEM_SIZE, this.ITEM_SIZE, 8);
       item.endFill();
-      this.gridView.addChild(item);
+      this.gridContainer.addChild(item);
 
       // Input
       item.interactive = true;
@@ -150,6 +151,19 @@ class AssetsModal {
     });
 
     engine.on('resize', this.redraw, this);
+
+    // Setup scroll of grid view
+    let wheelEvtName = 'onwheel' in document.createElement('div') ? 'wheel' : // Modern browsers support "wheel"
+      document.onmousewheel !== undefined ? 'mousewheel' : // Webkit and IE support at least "mousewheel"
+      'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
+
+    engine.view.addEventListener(wheelEvtName, (e) => {
+      if (this.modal.visible) {
+        this.panGridView(e.deltaY);
+
+        e.preventDefault();
+      }
+    });
 
     // Register operators
     ops.ui = Object.assign(ops.ui || {}, {
@@ -216,6 +230,10 @@ class AssetsModal {
 
       item.position.set(8 + q * (this.ITEM_SIZE + 8), 8 + r * (this.ITEM_SIZE + 8));
     });
+  }
+
+  panGridView(fct) {
+    this.gridContainer.y -= fct;
   }
 };
 
