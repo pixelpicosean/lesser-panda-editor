@@ -367,6 +367,8 @@ class Editor extends Scene {
     inst.skew.copy(obj.skew);
     inst.visible = obj.visible;
 
+    this.enableClickSelect(inst);
+
     return inst;
   }
   createText(obj) {
@@ -384,7 +386,18 @@ class Editor extends Scene {
     inst.skew.copy(obj.skew);
     inst.visible = obj.visible;
 
+    this.enableClickSelect(inst);
+
     return inst;
+  }
+
+  // Helpers
+  enableClickSelect(obj) {
+    obj.interactive = true;
+    obj.on('mousedown', (e) => {
+      operate('object.SELECT', obj.id);
+      e.stopPropagation();
+    });
   }
 };
 engine.addScene('Editor', Editor);
