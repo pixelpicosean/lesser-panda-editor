@@ -28,7 +28,6 @@ import './ops/object';
 // Components
 import outliner from './components/outliner';
 import inspector from './components/inspector';
-import assetsModal from './components/assets-modal';
 
 const init = (view2d) => ({
   context: context(),
@@ -59,7 +58,6 @@ const editor = (elm, view2d) => {
   const view = (model) => h(`section.${css.sidebar}`, [
     outliner(model, operate),
     inspector(model, operate),
-    assetsModal(model, operate),
   ]);
 
   // Logic stream
@@ -83,8 +81,94 @@ import engine from 'engine/core';
 import Scene from 'engine/scene';
 import PIXI from 'engine/pixi';
 import Timer from 'engine/timer';
+import loader from 'engine/loader';
 
 import Mousetrap from './mousetrap';
+
+class AssetsModal {
+  constructor(layer) {
+    // Constants
+    this.ITEM_SIZE = 100;
+
+    // Components
+    this.modal = new PIXI.Graphics().addTo(layer);
+
+    this.gridView = new PIXI.Container().addTo(this.modal);
+    this.gridMask = new PIXI.Graphics().addTo(this.modal);
+    this.gridView.mask = this.gridMask;
+
+    this.items = Object.keys(loader.resources).map((key) => {
+      // Item rectangle
+      let item = new PIXI.Graphics();
+      item.beginFill(0xa0a0a0);
+      item.drawRoundedRect(0, 0, this.ITEM_SIZE, this.ITEM_SIZE, 8);
+      item.endFill();
+      this.gridView.addChild(item);
+
+      // Sprite
+      // TODO: create instance based on its type
+      let g = new PIXI.Sprite(PIXI.Texture.fromAsset(key)).addTo(item);
+      if (g.width >= g.height) {
+        g.width = this.ITEM_SIZE * 0.9;
+        g.scale.y = g.scale.x;
+      }
+      else {
+        g.height = this.ITEM_SIZE * 0.9;
+        g.scale.x = g.scale.y;
+      }
+      g.position.set((this.ITEM_SIZE - g.width) * 0.5, (this.ITEM_SIZE - g.height) * 0.5);
+
+      // Label
+      let label = new PIXI.Graphics().addTo(item);
+      label.beginFill(0x000000, 0.5);
+      label.drawRoundedRect(0, 0, this.ITEM_SIZE, 24, 8);
+      label.endFill();
+      label.position.set((this.ITEM_SIZE - label.width) * 0.5, this.ITEM_SIZE - 24);
+      let t = new PIXI.Text(key, {
+        font: '12px Roboto, HelveticaNeue-Light, Helvetica Neue, HelveticaNeue, Helvetica, Arial, Geneva, sans-serif',
+        fill: '#ccc',
+      }, window.devicePixelRatio).addTo(label);
+      t.position.set((label.width - t.width) * 0.5, 4);
+
+      return item;
+    });
+
+    engine.on('resize', this.redraw, this);
+  }
+  redraw() {
+    this.drawModal();
+    this.drawGrid();
+  }
+
+  drawModal() {
+    // Update modal
+    this.modal.clear();
+    this.modal.beginFill(0x000000);
+    this.modal.drawRoundedRect(0, 0, engine.width * 0.9, engine.height * 0.9, 12);
+    this.modal.endFill();
+
+    this.modal.position.set((engine.width - this.modal.width) * 0.5, (engine.height - this.modal.height) * 0.5);
+
+    // Update modal mask
+    this.gridMask.clear();
+    this.gridMask.beginFill(0x000000);
+    this.gridMask.drawRect(this.gridView.x, this.gridView.y, this.gridWidth, this.gridHeight);
+    this.gridMask.endFill();
+  }
+  drawGrid() {
+    this.gridWidth = engine.width * 0.9 - 8;
+    this.gridHeight = engine.height * 0.9 - 8;
+
+    let itemsPerRow = Math.floor(this.gridWidth / this.ITEM_SIZE);
+
+    this.items.forEach((item, idx) => {
+      let r = Math.floor(idx / itemsPerRow);
+      let q = idx % itemsPerRow;
+
+      item.position.set(8 + q * (this.ITEM_SIZE + 8), 8 + r * (this.ITEM_SIZE + 8));
+    });
+  }
+};
 
 class Editor extends Scene {
   constructor() {
@@ -95,9 +179,15 @@ class Editor extends Scene {
     this.objLayer = new PIXI.Container().addTo(this.stage);
     this.uiLayer = new PIXI.Container().addTo(this.stage);
 
+    Timer.interval(100, () => {
+      engine.resizeFunc();
+    });
+
     // UI elements
     this.selectRect = new PIXI.Graphics().addTo(this.uiLayer);
     this.selectRect.visible = false;
+
+    this.assetsModal = new AssetsModal(this.uiLayer);
 
     // Map of object instances
     this.instMap = {};
