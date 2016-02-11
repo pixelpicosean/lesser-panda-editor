@@ -1,4 +1,5 @@
 import ops from './index';
+import Timer from 'engine/timer';
 
 let nextObjNameIdx = 0;
 const createContainer = (model, { name, x, y, parent = -1 }) => ({
@@ -124,7 +125,9 @@ ops.object = {
     }
 
     // TODO: use obeserver instead of directly calling
-    model.view2d.updateRectOf(model.context.selected);
+    Timer.later(10, () => {
+      model.view2d.updateRectOf(model.context.selected);
+    });
 
     return model;
   },
