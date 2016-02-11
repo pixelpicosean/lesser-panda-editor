@@ -276,8 +276,12 @@ class Editor extends Scene {
     // Bind shortcuts
     Mousetrap.bind('esc', () => this.events.emit('esc'));
     Mousetrap.bind('shift+a', () => this.events.emit('add'));
-  }
-  awake() {
+
+    // Event streams
+    this.click$ = R.fromEvents(this.events, 'click');
+    this.add$ = R.fromEvents(this.events, 'add');
+
+    // Actions
     const insertSprite = (key) => {
       console.log(`insertSprite: ${key}`);
       operate('object.ADD', {
@@ -287,11 +291,18 @@ class Editor extends Scene {
       });
     };
 
-    // Event streams
-    R.fromEvents(this.events, 'click')
-      .onValue((id) => this.select(id));
-    R.fromEvents(this.events, 'add')
-      .onValue(() => operate('ui.SHOW_ASSETS', insertSprite));
+    // Event handlers
+    this.handlers = {
+      select: (id) => operate('object.SELECT', id),
+      add: () => operate('ui.SHOW_ASSETS', insertSprite),
+    };
+  }
+  awake() {
+    // Plug event handlers
+    this.click$
+      .onValue(this.handlers.select);
+    this.add$
+      .onValue(this.handlers.add);
 
 
     // Tests
@@ -315,6 +326,12 @@ class Editor extends Scene {
     // Remove shortcut handlers
     Mousetrap.unbind('esc');
     Mousetrap.unbind('shift+a');
+
+    // Unplug event handlers
+    this.click$
+      .offValue(this.handlers.select);
+    this.add$
+      .offValue(this.handlers.add);
   }
 
   // APIs
