@@ -90,8 +90,20 @@ class AssetsModal {
     // Constants
     this.ITEM_SIZE = 100;
 
+    // States
+    this.selectCallback = null;
+
+    const choose = (key) => {
+      if (typeof(this.selectCallback) === 'function') {
+        this.selectCallback(key);
+      }
+
+      operate('ui.HIDE_ASSETS');
+    };
+
     // Components
     this.modal = new PIXI.Graphics().addTo(layer);
+    this.modal.visible = false;
 
     this.gridView = new PIXI.Container().addTo(this.modal);
     this.gridMask = new PIXI.Graphics().addTo(this.modal);
@@ -104,6 +116,10 @@ class AssetsModal {
       item.drawRoundedRect(0, 0, this.ITEM_SIZE, this.ITEM_SIZE, 8);
       item.endFill();
       this.gridView.addChild(item);
+
+      // Input
+      item.interactive = true;
+      item.on('mousedown', () => choose(key));
 
       // Sprite
       // TODO: create instance based on its type
@@ -134,12 +150,45 @@ class AssetsModal {
     });
 
     engine.on('resize', this.redraw, this);
-  }
-  redraw() {
-    this.drawModal();
-    this.drawGrid();
+
+    // Register operators
+    ops.ui = Object.assign(ops.ui || {}, {
+      SHOW_ASSETS: (model, cb) => {
+        this.show(cb);
+
+        return model;
+      },
+      HIDE_ASSETS: (model) => {
+        this.hide();
+
+        return model;
+      },
+    });
+
+    this.show = this.show.bind(this);
+    this.hide = this.hide.bind(this);
   }
 
+  // API
+  show(callback) {
+    this.selectCallback = callback;
+    this.modal.visible = true;
+
+    Mousetrap.bind('esc', this.hide);
+  }
+  hide() {
+    this.selectCallback = null;
+    this.modal.visible = false;
+
+    Mousetrap.unbind('esc');
+  }
+
+  redraw() {
+    if (this.modal.visible) {
+      this.drawModal();
+      this.drawGrid();
+    }
+  }
   drawModal() {
     // Update modal
     this.modal.clear();
