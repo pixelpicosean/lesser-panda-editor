@@ -82,6 +82,7 @@ import Scene from 'engine/scene';
 import PIXI from 'engine/pixi';
 import Timer from 'engine/timer';
 import loader from 'engine/loader';
+import { clamp } from 'engine/utils';
 
 import Mousetrap from './mousetrap';
 
@@ -91,6 +92,7 @@ class AssetsModal {
     this.ITEM_SIZE = 100;
 
     // States
+    this.gridBottom = 0;
     this.selectCallback = null;
 
     const choose = (key) => {
@@ -229,11 +231,13 @@ class AssetsModal {
       let q = idx % itemsPerRow;
 
       item.position.set(8 + q * (this.ITEM_SIZE + 8), 8 + r * (this.ITEM_SIZE + 8));
+
+      this.gridBottom = Math.max(item.position.y + item.height, this.gridBottom);
     });
   }
 
   panGridView(fct) {
-    this.gridContainer.y -= fct;
+    this.gridContainer.position.y = clamp(this.gridContainer.position.y - fct, Math.min(-(this.gridBottom - this.gridHeight), 0), 0);
   }
 };
 
