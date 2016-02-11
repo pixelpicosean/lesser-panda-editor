@@ -87,7 +87,7 @@ import { clamp } from 'engine/utils';
 import Mousetrap from './mousetrap';
 
 class AssetsModal {
-  constructor(layer) {
+  constructor(scene, layer) {
     // Constants
     this.ITEM_SIZE = 100;
 
@@ -181,6 +181,10 @@ class AssetsModal {
       },
     });
 
+    // Event streams
+    this.esc$ = R.fromEvents(scene.events, 'esc');
+
+    // Handlers
     this.show = this.show.bind(this);
     this.hide = this.hide.bind(this);
   }
@@ -190,13 +194,13 @@ class AssetsModal {
     this.selectCallback = callback;
     this.modal.visible = true;
 
-    Mousetrap.bind('esc', this.hide);
+    this.esc$.onValue(this.hide);
   }
   hide() {
     this.selectCallback = null;
     this.modal.visible = false;
 
-    Mousetrap.unbind('esc');
+    this.esc$.offValue(this.hide);
   }
 
   redraw() {
@@ -245,6 +249,9 @@ class Editor extends Scene {
   constructor() {
     super();
 
+    // Components
+    this.events = new EventEmitter();
+
     // Layers
     this.bgLayer = new PIXI.Container().addTo(this.stage);
     this.objLayer = new PIXI.Container().addTo(this.stage);
@@ -258,12 +265,17 @@ class Editor extends Scene {
     this.selectRect = new PIXI.Graphics().addTo(this.uiLayer);
     this.selectRect.visible = false;
 
-    this.assetsModal = new AssetsModal(this.uiLayer);
+    this.assetsModal = new AssetsModal(this, this.uiLayer);
 
     // Map of object instances
     this.instMap = {};
 
+    // Create sidebar
     editor(document.getElementById('container'), this);
+
+    // Bind shortcuts
+    Mousetrap.bind('esc', () => this.events.emit('esc'));
+    Mousetrap.bind('shift+a', () => this.events.emit('add'));
   }
   awake() {
     const insertSprite = (key) => {
@@ -275,12 +287,12 @@ class Editor extends Scene {
       });
     };
 
-    // Setup shortcuts handlers
-    const add = () => {
-      operate('ui.SHOW_ASSETS', insertSprite);
-    };
+    // Event streams
+    R.fromEvents(this.events, 'click')
+      .onValue((id) => this.select(id));
+    R.fromEvents(this.events, 'add')
+      .onValue(() => operate('ui.SHOW_ASSETS', insertSprite));
 
-    Mousetrap.bind('shift+a', add);
 
     // Tests
     operate('object.ADD', {
@@ -295,10 +307,14 @@ class Editor extends Scene {
       text: 'It Works!',
     });
 
-    operate('object.SELECT', 0);
+    Timer.later(60, () => {
+      operate('object.SELECT', 0);
+    });
   }
   exit() {
     // Remove shortcut handlers
+    Mousetrap.unbind('esc');
+    Mousetrap.unbind('shift+a');
   }
 
   // APIs
@@ -395,7 +411,7 @@ class Editor extends Scene {
   enableClickSelect(obj) {
     obj.interactive = true;
     obj.on('mousedown', (e) => {
-      operate('object.SELECT', obj.id);
+      this.events.emit('click', obj.id);
       e.stopPropagation();
     });
   }
