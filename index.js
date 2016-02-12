@@ -129,7 +129,6 @@ class Editor extends Scene {
     Mousetrap.bind('g', () => this.events.emit('g'));
 
     // Event streams
-    this.click$ = R.fromEvents(this.events, 'click');
     this.add$ = R.fromEvents(this.events, 'add');
 
     let esc$ = R.fromEvents(this.events, 'esc');
@@ -138,7 +137,7 @@ class Editor extends Scene {
     this.stage.interactive = true;
     this.stage.containsPoint = () => true;
     let mousemove$ = R.fromEvents(this.stage, 'mousemove');
-    let mousedown$ = R.fromEvents(this.stage, 'mousedown');
+    let mousedown$ = R.fromEvents(engine.view, 'mousedown');
 
     let g$ = R.fromEvents(this.events, 'g');
 
@@ -164,9 +163,6 @@ class Editor extends Scene {
     let endMove$ = startMove$
       .flatMapLatest(() => confirmOrCancelMove$);
 
-    startMove$.log('startMove');
-    endMove$.log('endMove');
-
     isMovingSrc$.plug(startMove$.map(() => true));
     isMovingSrc$.plug(endMove$.map(() => false));
 
@@ -188,7 +184,20 @@ class Editor extends Scene {
         .map(data2Pos)
         .diff(posDiff, startPos);
     });
-    // moveDelta$.log('moveDelta');
+
+    this.clickObject$ = R.fromEvents(this.events, 'clickObject')
+      .filterBy(notMoving$);
+
+    startMove$.onValue(() => {
+      // Hide select rect while moving
+      // TODO: change rect color and sync with target instead
+      this.selectRect.visible = false;
+    });
+    endMove$.onValue(() => {
+      // Update and show select rect
+      this.updateRectOf(this.model.context.selected);
+      this.selectRect.visible = true;
+    });
 
     moveDelta$.onValue((move) => {
       this.selectedInst.position.add(move[0], move[1]);
@@ -232,7 +241,7 @@ class Editor extends Scene {
   }
   awake() {
     // Plug event handlers
-    this.click$
+    this.clickObject$
       .onValue(this.handlers.select);
     this.add$
       .onValue(this.handlers.add);
@@ -264,7 +273,7 @@ class Editor extends Scene {
     Mousetrap.unbind('s');
 
     // Unplug event handlers
-    this.click$
+    this.clickObject$
       .offValue(this.handlers.select);
     this.add$
       .offValue(this.handlers.add);
@@ -365,7 +374,7 @@ class Editor extends Scene {
   enableClickSelect(obj) {
     obj.interactive = true;
     obj.on('mousedown', (e) => {
-      this.events.emit('click', obj.id);
+      this.events.emit('clickObject', obj.id);
       e.stopPropagation();
     });
   }
