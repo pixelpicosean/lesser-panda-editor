@@ -91,8 +91,11 @@ class Editor extends Scene {
   constructor() {
     super();
 
-    // Components
+    // States
     this.events = new EventEmitter();
+
+    this.instMap = {};
+    this.selectedInst = null;
 
     // Layers
     this.bgLayer = new PIXI.Container().addTo(this.stage);
@@ -109,19 +112,67 @@ class Editor extends Scene {
 
     this.assetsModal = new AssetsModal(this, this.uiLayer, operate);
 
-    // Map of object instances
-    this.instMap = {};
-
     // Create sidebar
     editor(document.getElementById('container'), this);
 
     // Bind shortcuts
     Mousetrap.bind('esc', () => this.events.emit('esc'));
     Mousetrap.bind('shift+a', () => this.events.emit('add'));
+    Mousetrap.bind('g', () => this.events.emit('g'));
 
     // Event streams
     this.click$ = R.fromEvents(this.events, 'click');
     this.add$ = R.fromEvents(this.events, 'add');
+
+    this.stage.interactive = true;
+    this.stage.containsPoint = () => true;
+    let mousemove$ = R.fromEvents(this.stage, 'mousemove');
+
+    let g$ = R.fromEvents(this.events, 'g');
+
+    let isMovingSrc$ = R.pool();
+
+    let isMoving$ = isMovingSrc$.toProperty(() => false);
+    let notMoving$ = isMoving$.map(t => !t);
+
+    let startMove$ = g$
+      .filter(() => !!this.selectedInst)
+      .filterBy(notMoving$);
+    let endMove$ = startMove$
+      .flatMapLatest(() => g$);
+
+    startMove$.log('startMove');
+    endMove$.log('endMove');
+
+    isMovingSrc$.plug(startMove$.map(() => true));
+    isMovingSrc$.plug(endMove$.map(() => false));
+
+    const data2Pos = (d) => ([
+      d.data.global.x,
+      d.data.global.y,
+    ]);
+    const posDiff = (p, n) => ([
+      n[0] - p[0],
+      n[1] - p[1],
+    ]);
+
+    const moveDelta$ = startMove$.flatMap(() => {
+      const startPos = [
+        Renderer.instance.plugins.interaction.eventData.data.global.x,
+        Renderer.instance.plugins.interaction.eventData.data.global.y,
+      ];
+      return mousemove$.takeUntilBy(endMove$)
+        .map(data2Pos)
+        .diff(posDiff, startPos);
+    });
+    moveDelta$.log('moveDelta');
+
+    moveDelta$.onValue((move) => {
+      this.selectedInst.position.add(move[0], move[1]);
+    });
+    endMove$.onValue(() => {
+      console.log(`pos: (${this.selectedInst.position.x}, ${this.selectedInst.position.y})`);
+    });
 
     // Actions
     const insertSprite = (key) => {
@@ -168,6 +219,9 @@ class Editor extends Scene {
     // Remove shortcut handlers
     Mousetrap.unbind('esc');
     Mousetrap.unbind('shift+a');
+    Mousetrap.unbind('g');
+    Mousetrap.unbind('r');
+    Mousetrap.unbind('s');
 
     // Unplug event handlers
     this.click$
@@ -194,6 +248,7 @@ class Editor extends Scene {
     parent.addChild(target);
   }
   select(id) {
+    this.selectedInst = this.instMap[id];
     this.updateRectOf(id);
   }
   updateRectOf(id) {
