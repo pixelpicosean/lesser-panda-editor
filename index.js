@@ -29,11 +29,17 @@ import './ops/object';
 import outliner from './components/outliner';
 import inspector from './components/inspector';
 
-const init = (view2d) => ({
-  context: context(),
-  data: data(),
-  view2d: view2d,
-});
+const init = (view2d) => {
+  let model = {
+    context: context(),
+    data: data(),
+    view2d: view2d,
+  };
+
+  view2d.model = model;
+
+  return model;
+};
 
 // Operation dispatcher
 let emitter;
@@ -93,6 +99,7 @@ class Editor extends Scene {
 
     // States
     this.events = new EventEmitter();
+    this.model = null;
 
     this.instMap = {};
     this.selectedInst = null;
@@ -117,6 +124,7 @@ class Editor extends Scene {
 
     // Bind shortcuts
     Mousetrap.bind('esc', () => this.events.emit('esc'));
+    Mousetrap.bind('enter', () => this.events.emit('enter'));
     Mousetrap.bind('shift+a', () => this.events.emit('add'));
     Mousetrap.bind('g', () => this.events.emit('g'));
 
@@ -124,9 +132,13 @@ class Editor extends Scene {
     this.click$ = R.fromEvents(this.events, 'click');
     this.add$ = R.fromEvents(this.events, 'add');
 
+    let esc$ = R.fromEvents(this.events, 'esc');
+    let enter$ = R.fromEvents(this.events, 'enter');
+
     this.stage.interactive = true;
     this.stage.containsPoint = () => true;
     let mousemove$ = R.fromEvents(this.stage, 'mousemove');
+    let mousedown$ = R.fromEvents(this.stage, 'mousedown');
 
     let g$ = R.fromEvents(this.events, 'g');
 
@@ -138,8 +150,19 @@ class Editor extends Scene {
     let startMove$ = g$
       .filter(() => !!this.selectedInst)
       .filterBy(notMoving$);
+
+    let confirmMove$ = startMove$
+      .flatMapLatest(() => R.merge([mousedown$, enter$]));
+    let cancelMove$ = startMove$
+      .flatMapLatest(() => esc$);
+
+    let confirmOrCancelMove$ = R.merge([
+      confirmMove$,
+      cancelMove$,
+    ]);
+
     let endMove$ = startMove$
-      .flatMapLatest(() => g$);
+      .flatMapLatest(() => confirmOrCancelMove$);
 
     startMove$.log('startMove');
     endMove$.log('endMove');
@@ -165,13 +188,30 @@ class Editor extends Scene {
         .map(data2Pos)
         .diff(posDiff, startPos);
     });
-    moveDelta$.log('moveDelta');
+    // moveDelta$.log('moveDelta');
 
     moveDelta$.onValue((move) => {
       this.selectedInst.position.add(move[0], move[1]);
     });
-    endMove$.onValue(() => {
-      console.log(`pos: (${this.selectedInst.position.x}, ${this.selectedInst.position.y})`);
+
+    confirmMove$.onValue(() => {
+      let id = this.model.context.selected;
+
+      let model = this.model.data.getObjectById(id);
+      let inst = this.instMap[id];
+
+      model.x = inst.position.x;
+      model.y = inst.position.y;
+    });
+
+    cancelMove$.onValue(() => {
+      let id = this.model.context.selected;
+
+      let model = this.model.data.getObjectById(id);
+      let inst = this.instMap[id];
+
+      inst.position.x = model.x;
+      inst.position.y = model.y;
     });
 
     // Actions
