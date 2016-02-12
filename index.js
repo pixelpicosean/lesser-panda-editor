@@ -209,8 +209,9 @@ class Editor extends Scene {
       let model = this.model.data.getObjectById(id);
       let inst = this.instMap[id];
 
-      model.x = inst.position.x;
-      model.y = inst.position.y;
+      // TODO: Group update
+      operate('object.UPDATE', ['x', inst.position.x]);
+      operate('object.UPDATE', ['y', inst.position.y]);
     });
 
     cancelMove$.onValue(() => {
