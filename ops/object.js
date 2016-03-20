@@ -105,7 +105,7 @@ ops.object = {
     if (parent) {
       parent.children.push(obj.id);
     }
-    // Add to root is no object is selected
+    // Add to root if no object is selected
     else {
       model.data.children.push(obj.id);
     }
