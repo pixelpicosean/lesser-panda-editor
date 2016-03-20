@@ -6,12 +6,15 @@ import { clamp } from 'engine/utils';
 
 import ops from 'editor/ops';
 
-export default class AssetsModal {
-  constructor(scene, layer, operate) {
-    // Constants
-    this.ITEM_SIZE = 100;
+const ITEM_SIZE = 80;
+const ITEM_SPACING = 6;
+const PANEL_WIDTH = ITEM_SIZE * 2 + ITEM_SPACING * 3;
 
+export default class AssetsPanel {
+  constructor(scene, layer, operate) {
     // States
+    this.gridWidth = PANEL_WIDTH;
+    this.gridHeight = engine.viewSize.y;
     this.gridBottom = 0;
     this.selectCallback = null;
 
@@ -24,11 +27,11 @@ export default class AssetsModal {
     };
 
     // Components
-    this.modal = new PIXI.Graphics().addTo(layer);
-    this.modal.visible = false;
+    this.panel = new PIXI.Graphics().addTo(layer);
+    this.panel.visible = false;
 
-    this.gridView = new PIXI.Container().addTo(this.modal);
-    this.gridMask = new PIXI.Graphics().addTo(this.modal);
+    this.gridView = new PIXI.Container().addTo(this.panel);
+    this.gridMask = new PIXI.Graphics().addTo(this.panel);
     this.gridView.mask = this.gridMask;
     this.gridContainer = new PIXI.Container().addTo(this.gridView);
 
@@ -36,7 +39,7 @@ export default class AssetsModal {
       // Item rectangle
       let item = new PIXI.Graphics();
       item.beginFill(0xa0a0a0);
-      item.drawRoundedRect(0, 0, this.ITEM_SIZE, this.ITEM_SIZE, 8);
+      item.drawRoundedRect(0, 0, ITEM_SIZE, ITEM_SIZE, 8);
       item.endFill();
       this.gridContainer.addChild(item);
 
@@ -48,21 +51,21 @@ export default class AssetsModal {
       // TODO: create instance based on its type
       let g = new PIXI.Sprite(PIXI.Texture.fromAsset(key)).addTo(item);
       if (g.width >= g.height) {
-        g.width = this.ITEM_SIZE * 0.9;
+        g.width = ITEM_SIZE * 0.9;
         g.scale.y = g.scale.x;
       }
       else {
-        g.height = this.ITEM_SIZE * 0.9;
+        g.height = ITEM_SIZE * 0.9;
         g.scale.x = g.scale.y;
       }
-      g.position.set((this.ITEM_SIZE - g.width) * 0.5, (this.ITEM_SIZE - g.height) * 0.5);
+      g.position.set((ITEM_SIZE - g.width) * 0.5, (ITEM_SIZE - g.height) * 0.5);
 
       // Label
       let label = new PIXI.Graphics().addTo(item);
       label.beginFill(0x000000, 0.5);
-      label.drawRoundedRect(0, 0, this.ITEM_SIZE, 24, 8);
+      label.drawRoundedRect(0, 0, ITEM_SIZE, 24, 8);
       label.endFill();
-      label.position.set((this.ITEM_SIZE - label.width) * 0.5, this.ITEM_SIZE - 24);
+      label.position.set((ITEM_SIZE - label.width) * 0.5, ITEM_SIZE - 24);
       let t = new PIXI.Text(key, {
         font: '12px Roboto, HelveticaNeue-Light, Helvetica Neue, HelveticaNeue, Helvetica, Arial, Geneva, sans-serif',
         fill: '#ccc',
@@ -80,7 +83,7 @@ export default class AssetsModal {
       'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
 
     engine.view.addEventListener(wheelEvtName, (e) => {
-      if (this.modal.visible) {
+      if (this.panel.visible) {
         this.panGridView(e.deltaY);
 
         e.preventDefault();
@@ -112,49 +115,47 @@ export default class AssetsModal {
   // API
   show(callback) {
     this.selectCallback = callback;
-    this.modal.visible = true;
+    this.panel.visible = true;
 
     this.esc$.onValue(this.hide);
   }
   hide() {
     this.selectCallback = null;
-    this.modal.visible = false;
+    this.panel.visible = false;
 
     this.esc$.offValue(this.hide);
   }
 
   redraw() {
-    if (this.modal.visible) {
-      this.drawModal();
+    if (this.panel.visible) {
+      this.drawPanel();
       this.drawGrid();
     }
   }
-  drawModal() {
-    // Update modal
-    this.modal.clear();
-    this.modal.beginFill(0x000000);
-    this.modal.drawRoundedRect(0, 0, engine.width * 0.9, engine.height * 0.9, 12);
-    this.modal.endFill();
+  drawPanel() {
+    // Update panel
+    this.panel.clear();
+    this.panel.beginFill(0x000000);
+    this.panel.drawRect(0, 0, PANEL_WIDTH, engine.viewSize.y);
+    this.panel.endFill();
 
-    this.modal.position.set((engine.width - this.modal.width) * 0.5, (engine.height - this.modal.height) * 0.5);
-
-    // Update modal mask
+    // Update panel mask
     this.gridMask.clear();
     this.gridMask.beginFill(0x000000);
     this.gridMask.drawRect(this.gridView.x, this.gridView.y, this.gridWidth, this.gridHeight);
     this.gridMask.endFill();
   }
   drawGrid() {
-    this.gridWidth = engine.width * 0.9 - 8;
-    this.gridHeight = engine.height * 0.9 - 8;
+    this.gridWidth = PANEL_WIDTH;
+    this.gridHeight = engine.viewSize.y;
 
-    let itemsPerRow = Math.floor(this.gridWidth / this.ITEM_SIZE);
+    let itemsPerRow = Math.floor(this.gridWidth / ITEM_SIZE);
 
     this.items.forEach((item, idx) => {
       let r = Math.floor(idx / itemsPerRow);
       let q = idx % itemsPerRow;
 
-      item.position.set(8 + q * (this.ITEM_SIZE + 8), 8 + r * (this.ITEM_SIZE + 8));
+      item.position.set(ITEM_SPACING + q * (ITEM_SIZE + ITEM_SPACING), ITEM_SPACING + r * (ITEM_SIZE + ITEM_SPACING));
 
       this.gridBottom = Math.max(item.position.y + item.height, this.gridBottom);
     });

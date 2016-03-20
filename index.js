@@ -105,7 +105,7 @@ import loader from 'engine/loader';
 
 import Mousetrap from './mousetrap';
 
-import AssetsModal from './components/assets-modal';
+import AssetsPanel from './components/assets-panel';
 
 class Editor extends Scene {
   constructor() {
@@ -131,7 +131,7 @@ class Editor extends Scene {
     this.selectRect = new PIXI.Graphics().addTo(this.uiLayer);
     this.selectRect.visible = false;
 
-    this.assetsModal = new AssetsModal(this, this.uiLayer, operate);
+    this.assetsPanel = new AssetsPanel(this, this.uiLayer, operate);
 
     // Create sidebar
     editor(document.getElementById('container'), this);
