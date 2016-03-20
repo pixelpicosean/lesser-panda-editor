@@ -1,6 +1,6 @@
 import Renderer from 'engine/renderer';
 import config from 'game/config';
-config.resizeMode = 'dom';
+config.resizeMode = 'crop';
 
 import R from 'engine/reactive';
 import EventEmitter from 'engine/eventemitter3';
