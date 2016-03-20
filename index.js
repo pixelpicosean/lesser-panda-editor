@@ -15,6 +15,8 @@ const patch = snabbdom.init([
 ]);
 import h from 'editor/snabbdom/h';
 
+import Split from 'editor/split';
+
 import css from './style.css';
 
 // Model
@@ -61,7 +63,19 @@ const actions$ = R.stream(e => emitter = e);
 const editor = (elm, view2d) => {
 
   // Editor view
-  const view = (model) => h(`section.${css.sidebar}`, [
+  const view = (model) => h(`section.${css.sidebar}`, {
+    hook: {
+      key: 'sidebar',
+      insert: (vnode) => {
+        if (vnode.elm.hasChildNodes()) {
+          Split(Array.prototype.slice.call(vnode.elm.childNodes), {
+            direction: 'vertical',
+            minSize: 20,
+          });
+        }
+      },
+    },
+  }, [
     outliner(model, operate),
     inspector(model, operate),
   ]);

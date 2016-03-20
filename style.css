@@ -10,7 +10,9 @@ html, body {
 }
 
 * {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
 
   margin: 0;
   padding: 0;
@@ -69,6 +71,32 @@ body {
   position: fixed;
   top: 0;
   right: 0;
+}
+
+/* Split */
+:global .gutter {
+  background-color: #39bdfd;
+}
+
+:global .gutter.gutter-horizontal {
+  background: #39bdfd;
+  cursor: ew-resize;
+}
+
+:global .gutter.gutter-vertical {
+  background: #39bdfd;
+  cursor: ns-resize;
+}
+
+:global .split,
+:global .gutter.gutter-horizontal {
+  height: 100%;
+  float: left;
+}
+
+:global .split {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Theme */
