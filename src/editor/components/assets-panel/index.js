@@ -70,7 +70,14 @@ export default class AssetsPanel {
         font: '12px Roboto, HelveticaNeue-Light, Helvetica Neue, HelveticaNeue, Helvetica, Arial, Geneva, sans-serif',
         fill: '#ccc',
       }, window.devicePixelRatio).addTo(label);
-      t.position.set((label.width - t.width) * 0.5, 4);
+      t.anchor.set(0.5);
+      t.position.set(label.width * 0.5, label.height * 0.5);
+
+      // Display label only when mouse is over the item
+      label.visible = false;
+      item.interactive = true;
+      item.mouseover = () => { label.visible = true; console.log('mouseover') };
+      item.mouseout = () => { label.visible = false; console.log('mouseout') };
 
       return item;
     });
