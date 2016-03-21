@@ -154,6 +154,15 @@ class Editor extends Scene {
     let mousemove$ = R.fromEvents(this.stage, 'mousemove');
     let mousedown$ = R.fromEvents(engine.view, 'mousedown');
 
+    // Un-focus inputs when click on the mousedown
+    mousedown$.onValue(() => {
+      if (document.activeElement.tagName === 'INPUT') {
+        document.activeElement.blur();
+      }
+    });
+
+
+    // Transform
     let transform$ = R.fromEvents(this.events, 'transform');
 
     let isTransformingSrc$ = R.pool();
