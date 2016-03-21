@@ -207,28 +207,19 @@ class Editor extends Scene {
 
     // Translate ------------------------------------------------
 
-    const data2Pos = (d) => ([
-      d.data.global.x,
-      d.data.global.y,
-    ]);
-    const posDiff = (p, n) => ([
-      n[0] - p[0],
-      n[1] - p[1],
-    ]);
+    const data2Pos = (d) => d.data.global.clone();
+    const posDiff = (p, n) => n.clone().subtract(p);
 
     // Movement delta from last move event
-    const gMoveDelta$ = start2Translate$.flatMap(() => {
-      const startPos = [
-        Renderer.instance.plugins.interaction.eventData.data.global.x,
-        Renderer.instance.plugins.interaction.eventData.data.global.y,
-      ];
+    const translateDelta$ = start2Translate$.flatMap(() => {
+      const startPos = Renderer.instance.plugins.interaction.eventData.data.global.clone();
       return mousemove$.takeUntilBy(endTransform$)
         .map(data2Pos)
         .diff(posDiff, startPos);
     });
 
-    gMoveDelta$.onValue((move) => {
-      this.selectedInst.position.add(move[0], move[1]);
+    translateDelta$.onValue((move) => {
+      this.selectedInst.position.add(move);
     });
     // Confirm translate
     confirmTransform$
@@ -259,7 +250,6 @@ class Editor extends Scene {
     // Rotate ------------------------------------------------
 
     const PI2 = Math.PI * 2;
-    const data2PosVec2 = (d) => d.data.global.clone();
     const rotation$ = start2Rotate$.flatMap(() => {
       const startPos = Vector.create(Renderer.instance.plugins.interaction.eventData.data.global.x,
         Renderer.instance.plugins.interaction.eventData.data.global.y);
@@ -267,7 +257,7 @@ class Editor extends Scene {
       const startInstRot = this.selectedInst.rotation;
 
       return mousemove$.takeUntilBy(endTransform$)
-        .map(data2PosVec2)
+        .map(data2Pos)
         .map(pos => (pos.angle(this.selectedInst.position) - startMouseRot + startInstRot) % PI2);
     });
 
@@ -307,7 +297,7 @@ class Editor extends Scene {
 
       const scaleVec = startScale.clone();
       return mousemove$.takeUntilBy(endTransform$)
-        .map(data2PosVec2)
+        .map(data2Pos)
         .map(pos => pos.distance(this.selectedInst.position) - startDist)
         .map(distDelta => distDelta / startDist)
         .map(scaleDelta => scaleVec.copy(startScale).add(scaleDelta));
