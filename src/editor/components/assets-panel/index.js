@@ -77,8 +77,6 @@ export default class AssetsPanel {
       // Display label only when mouse is over the item
       label.visible = false;
       item.interactive = true;
-      item.mouseover = () => { label.visible = true; console.log('mouseover') };
-      item.mouseout = () => { label.visible = false; console.log('mouseout') };
 
       return item;
     });

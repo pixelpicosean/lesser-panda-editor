@@ -417,7 +417,7 @@ class Editor extends Scene {
 
     g.clear();
     g.lineStyle(1, 0x39bdfd);
-    g.drawRect(bounds.x - target.pivot.x, bounds.y - target.pivot.y, bounds.width, bounds.height);
+    g.drawRect(bounds.x - target.pivot.x, bounds.y - target.pivot.y, bounds.width * target.scale.x, bounds.height * target.scale.y);
     g.position.copy(target.position);
     g.rotation = target.rotation;
 
