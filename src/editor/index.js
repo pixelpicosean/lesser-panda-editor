@@ -4,6 +4,7 @@ config.resizeMode = 'crop';
 
 import R from 'engine/reactive';
 import EventEmitter from 'engine/eventemitter3';
+import Vector from 'engine/vector';
 
 import snabbdom from 'editor/snabbdom';
 const patch = snabbdom.init([
@@ -136,7 +137,9 @@ class Editor extends Scene {
     Mousetrap.bind('esc', () => this.events.emit('esc'));
     Mousetrap.bind('enter', () => this.events.emit('enter'));
     Mousetrap.bind('shift+a', () => this.events.emit('add'));
-    Mousetrap.bind('g', () => this.events.emit('g'));
+    Mousetrap.bind('g', () => this.events.emit('transform', 'g'));
+    Mousetrap.bind('r', () => this.events.emit('transform', 'r'));
+    Mousetrap.bind('s', () => this.events.emit('transform', 's'));
 
     // Event streams
     this.add$ = R.fromEvents(this.events, 'add');
@@ -149,32 +152,60 @@ class Editor extends Scene {
     let mousemove$ = R.fromEvents(this.stage, 'mousemove');
     let mousedown$ = R.fromEvents(engine.view, 'mousedown');
 
-    let g$ = R.fromEvents(this.events, 'g');
+    let transform$ = R.fromEvents(this.events, 'transform');
 
-    let isMovingSrc$ = R.pool();
+    let isTransformingSrc$ = R.pool();
 
-    let isMoving$ = isMovingSrc$.toProperty(() => false);
-    let notMoving$ = isMoving$.map(t => !t);
+    let isTransforming$ = isTransformingSrc$.toProperty(() => false);
+    let notTransforming$ = isTransforming$.map(t => !t);
 
-    let startMove$ = g$
+    // Start a new transform operation, keeps the transform "type"
+    let start2Transform$ = transform$
       .filter(() => !!this.selectedInst)
-      .filterBy(notMoving$);
+      .filterBy(notTransforming$);
 
-    let confirmMove$ = startMove$
+    // Transform type flags
+    let isTranslating$ = start2Transform$.map(t => t === 'g');
+    let isRotating$ = start2Transform$.map(t => t === 'r');
+    let isScaling$ = start2Transform$.map(t => t === 's');
+
+    let start2Translate$ = isTranslating$.filter();
+    let start2Rotate$ = isRotating$.filter();
+    let start2Scale$ = isScaling$.filter();
+
+    let confirmTransform$ = start2Transform$
       .flatMapLatest(() => R.merge([mousedown$, enter$]));
-    let cancelMove$ = startMove$
+    let cancelTransform$ = start2Transform$
       .flatMapLatest(() => esc$);
 
     let confirmOrCancelMove$ = R.merge([
-      confirmMove$,
-      cancelMove$,
+      confirmTransform$,
+      cancelTransform$,
     ]);
 
-    let endMove$ = startMove$
+    let endTransform$ = start2Transform$
       .flatMapLatest(() => confirmOrCancelMove$);
 
-    isMovingSrc$.plug(startMove$.map(() => true));
-    isMovingSrc$.plug(endMove$.map(() => false));
+    isTransformingSrc$.plug(start2Transform$.map(() => true));
+    isTransformingSrc$.plug(endTransform$.map(() => false));
+
+    this.clickObject$ = R.fromEvents(this.events, 'clickObject')
+      .filterBy(notTransforming$);
+
+    // Show and hide selecting rectangle
+    start2Transform$.onValue(() => {
+      // Hide select rect while moving
+      // TODO: change rect color and sync with target instead
+      this.selectRect.visible = false;
+    });
+    endTransform$.onValue(() => {
+      // Update and show select rect
+      this.updateRectOf(this.model.context.selected);
+      this.selectRect.visible = true;
+    });
+
+
+    // Translate ------------------------------------------------
 
     const data2Pos = (d) => ([
       d.data.global.x,
@@ -185,54 +216,132 @@ class Editor extends Scene {
       n[1] - p[1],
     ]);
 
-    const moveDelta$ = startMove$.flatMap(() => {
+    // Movement delta from last move event
+    const gMoveDelta$ = start2Translate$.flatMap(() => {
       const startPos = [
         Renderer.instance.plugins.interaction.eventData.data.global.x,
         Renderer.instance.plugins.interaction.eventData.data.global.y,
       ];
-      return mousemove$.takeUntilBy(endMove$)
+      return mousemove$.takeUntilBy(endTransform$)
         .map(data2Pos)
         .diff(posDiff, startPos);
     });
 
-    this.clickObject$ = R.fromEvents(this.events, 'clickObject')
-      .filterBy(notMoving$);
-
-    startMove$.onValue(() => {
-      // Hide select rect while moving
-      // TODO: change rect color and sync with target instead
-      this.selectRect.visible = false;
-    });
-    endMove$.onValue(() => {
-      // Update and show select rect
-      this.updateRectOf(this.model.context.selected);
-      this.selectRect.visible = true;
-    });
-
-    moveDelta$.onValue((move) => {
+    gMoveDelta$.onValue((move) => {
       this.selectedInst.position.add(move[0], move[1]);
     });
+    // Confirm translate
+    confirmTransform$
+      .filterBy(isTranslating$)
+      .onValue(() => {
+        let id = this.model.context.selected;
 
-    confirmMove$.onValue(() => {
-      let id = this.model.context.selected;
+        let model = this.model.data.getObjectById(id);
+        let inst = this.instMap[id];
 
-      let model = this.model.data.getObjectById(id);
-      let inst = this.instMap[id];
+        // TODO: Group update
+        operate('object.UPDATE', ['x', inst.position.x]);
+        operate('object.UPDATE', ['y', inst.position.y]);
+      });
+    // Cancle translate
+    cancelTransform$
+      .filterBy(isTranslating$)
+      .onValue(() => {
+        let id = this.model.context.selected;
 
-      // TODO: Group update
-      operate('object.UPDATE', ['x', inst.position.x]);
-      operate('object.UPDATE', ['y', inst.position.y]);
+        let model = this.model.data.getObjectById(id);
+        let inst = this.instMap[id];
+
+        inst.position.x = model.x;
+        inst.position.y = model.y;
+      });
+
+    // Rotate ------------------------------------------------
+
+    const PI2 = Math.PI * 2;
+    const data2PosVec2 = (d) => d.data.global.clone();
+    const rotation$ = start2Rotate$.flatMap(() => {
+      const startPos = Vector.create(Renderer.instance.plugins.interaction.eventData.data.global.x,
+        Renderer.instance.plugins.interaction.eventData.data.global.y);
+      const startMouseRot = startPos.angle(this.selectedInst.position);
+      const startInstRot = this.selectedInst.rotation;
+
+      return mousemove$.takeUntilBy(endTransform$)
+        .map(data2PosVec2)
+        .map(pos => (pos.angle(this.selectedInst.position) - startMouseRot + startInstRot) % PI2);
     });
 
-    cancelMove$.onValue(() => {
-      let id = this.model.context.selected;
-
-      let model = this.model.data.getObjectById(id);
-      let inst = this.instMap[id];
-
-      inst.position.x = model.x;
-      inst.position.y = model.y;
+    rotation$.onValue((rot) => {
+      this.selectedInst.rotation = rot;
     });
+    // Confirm translate
+    confirmTransform$
+      .filterBy(isRotating$)
+      .onValue(() => {
+        let id = this.model.context.selected;
+
+        let model = this.model.data.getObjectById(id);
+        let inst = this.instMap[id];
+
+        operate('object.UPDATE', ['rotation', inst.rotation]);
+      });
+    // Cancle translate
+    cancelTransform$
+      .filterBy(isRotating$)
+      .onValue(() => {
+        let id = this.model.context.selected;
+
+        let model = this.model.data.getObjectById(id);
+        let inst = this.instMap[id];
+
+        inst.rotation = model.rotation;
+      });
+
+    // Scale ------------------------------------------------
+
+    const scale$ = start2Scale$.flatMap(() => {
+      const startPos = Vector.create(Renderer.instance.plugins.interaction.eventData.data.global.x,
+        Renderer.instance.plugins.interaction.eventData.data.global.y);
+      const startDist = startPos.distance(this.selectedInst.position);
+      const startScale = this.selectedInst.scale.clone();
+
+      const scaleVec = startScale.clone();
+      return mousemove$.takeUntilBy(endTransform$)
+        .map(data2PosVec2)
+        .map(pos => pos.distance(this.selectedInst.position) - startDist)
+        .map(distDelta => distDelta / startDist)
+        .map(scaleDelta => scaleVec.copy(startScale).add(scaleDelta));
+    });
+
+    scale$.onValue((scale) => {
+      this.selectedInst.scale.copy(scale);
+    });
+    // Confirm translate
+    confirmTransform$
+      .filterBy(isScaling$)
+      .onValue(() => {
+        let id = this.model.context.selected;
+
+        let model = this.model.data.getObjectById(id);
+        let inst = this.instMap[id];
+
+        // TODO: group operation
+        operate('object.UPDATE', ['scale.x', inst.scale.x]);
+        operate('object.UPDATE', ['scale.y', inst.scale.y]);
+      });
+    // Cancle translate
+    cancelTransform$
+      .filterBy(isRotating$)
+      .onValue(() => {
+        let id = this.model.context.selected;
+
+        let model = this.model.data.getObjectById(id);
+        let inst = this.instMap[id];
+
+        inst.scale.copy(model.scale);
+      });
+
+
 
     // Actions
     const insertSprite = (key) => {
