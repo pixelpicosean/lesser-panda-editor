@@ -1,5 +1,6 @@
 import ops from './index';
 import Timer from 'engine/timer';
+import { removeItems } from 'engine/utils';
 
 let nextObjNameIdx = 0;
 const createContainer = (model, { name, x, y, parent = -1 }) => ({
@@ -70,7 +71,7 @@ const updateHandlers = {
     let target = model.data.getObjectById(model.context.selected);
     let parent = (target.parent < 0 ? model.data : model.data.getObjectById(target.parent));
     // Remove from current paretn
-    parent.children.splice(parent.children.indexOf(target.id), 1);
+    removeItems(parent.children, parent.children.indexOf(target.id), 1);
     // Add to new parent
     parent = model.data.getObjectById(param);
     parent.children.push(target.id);
@@ -81,19 +82,21 @@ const updateHandlers = {
 };
 
 // Add operators to "object" namespace
-ops.object = {
-  SELECT: (model, param) => {
+ops.registerOperator('object', 'SELECT', {
+  rewindable: false,
+  execute: (model, param) => {
     // Save selected object to context
     model.context.selected = param;
 
     // Select in view2d
     // TODO: use some obeserve mechanism instead of directly calling
     model.view2d.select(param);
-
-    return model;
   },
+});
 
-  ADD: (model, param) => {
+ops.registerOperator('object', 'ADD', {
+  rewindable: true,
+  execute: (model, param) => {
     // Create object instance
     const obj = factoryMethods[param.type](model, param);
 
@@ -113,10 +116,23 @@ ops.object = {
     // Create a instance and add it to view2d
     model.view2d.add(obj);
 
-    return model;
+    return {
+      objId: obj.id,
+      parent: parent || model.data,
+    };
   },
+  rewind: (model, param) => {
+    // Remove object model
+    delete model.data.objectStore[param.objId];
+    removeItems(param.parent.children, param.parent.children.indexOf(param.objId), 1);
+    // Remove object instance
+    model.view2d.remove(param.objId);
+  },
+});
 
-  UPDATE: (model, param) => {
+ops.registerOperator('object', 'UPDATE', {
+  rewindable: true,
+  execute: (model, param) => {
     if (updateHandlers[param[0]]) {
       updateHandlers[param[0]](model, param);
     }
@@ -131,8 +147,12 @@ ops.object = {
 
     return model;
   },
+  rewind: (model, param) => {},
+});
 
-  REMOVE: (model) => {
+ops.registerOperator('object', 'REMOVE', {
+  rewindable: true,
+  execute: (model, param) => {
     // Remove model and instance
     model.data.removeObject(model.context.selected);
     model.view2d.remove(model.context.selected);
@@ -142,4 +162,5 @@ ops.object = {
 
     return model;
   },
-};
+  rewind: (model, param) => {},
+});

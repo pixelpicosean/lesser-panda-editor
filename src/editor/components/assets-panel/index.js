@@ -97,13 +97,17 @@ export default class AssetsPanel {
     });
 
     // Register operators
-    ops.ui = Object.assign(ops.ui || {}, {
-      SHOW_ASSETS: (model, cb) => {
+    ops.registerOperator('ui', 'SHOW_ASSETS', {
+      rewindable: false,
+      execute: (model, cb) => {
         this.show(cb);
 
         return model;
       },
-      HIDE_ASSETS: (model) => {
+    });
+    ops.registerOperator('ui', 'HIDE_ASSETS', {
+      rewindable: false,
+      execute: (model) => {
         this.hide();
 
         return model;

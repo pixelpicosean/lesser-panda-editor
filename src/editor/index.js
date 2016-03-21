@@ -5,6 +5,7 @@ config.resizeMode = 'crop';
 import R from 'engine/reactive';
 import EventEmitter from 'engine/eventemitter3';
 import Vector from 'engine/vector';
+import { removeItems } from 'engine/utils';
 
 import snabbdom from 'editor/snabbdom';
 const patch = snabbdom.init([
@@ -37,6 +38,22 @@ const init = (view2d) => {
     context: context(),
     data: data(),
     view2d: view2d,
+
+    // Undo support
+    rewindIdx: 0, // [... 3, 2, 1] 0(current)
+    rewindQueue: [],
+
+    rewind: () => {
+      if (model.rewindIdx < model.rewindQueue.length - 1) {
+        model.rewindIdx += 1;
+
+        let act = model.rewindQueue[model.rewindQueue.length - model.rewindIdx];
+        act.action(model, act.param);
+      }
+      else {
+        console.log('[Dev] can not rewind any more');
+      }
+    },
   };
 
   view2d.model = model;
@@ -48,9 +65,9 @@ const init = (view2d) => {
 let emitter;
 const index = (o, i) => (o ? o[i] : undefined);
 const operate = (actStr, param) => {
-  let action = actStr.split('.').reduce(index, ops);
-  if (action) {
-    emitter.emit({ action, param });
+  let operator = actStr.split('.').reduce(index, ops);
+  if (operator) {
+    emitter.emit({ operator, param });
   }
   else {
     emitter.error(`WARNING: operator "${actStr}" not found`);
@@ -84,16 +101,30 @@ const editor = (elm, view2d) => {
   // Logic stream
   actions$
     // Update
-    .scan((model, op) => op.action(model, op.param), init(view2d))
+    .scan((model, act) => {
+      let rewindData = act.operator.execute(model, act.param);
+      // The operation can be undo
+      if (act.operator.rewindable) {
+        // Delete undo histories that cannot be reached any more
+        if (model.rewindIdx > 0) {
+          removeItems(model.rewindQueue, model.rewindQueue.length - model.rewindIdx + 1);
+        }
+        // Reset rewind index to default
+        model.rewindIdx = 0;
+        // Add a new rewind item to the history
+        model.rewindQueue.push({
+          action: act.operator.rewind,
+          param: rewindData,
+        });
+      }
+      return model;
+    }, init(view2d))
     // View
     .map(view)
     // Apply to editor element
     .scan(patch, elm)
     // Logging
     .onError(err => console.log(err));
-
-  // Fix canvas style issue
-  Renderer.resize(100, 100);
 
 };
 
@@ -138,6 +169,8 @@ class Editor extends Scene {
     // Bind shortcuts
     Mousetrap.bind('esc', () => this.events.emit('esc'));
     Mousetrap.bind('enter', () => this.events.emit('enter'));
+    Mousetrap.bind('meta+z', () => this.events.emit('undo'));
+    Mousetrap.bind('meta+shift+z', () => this.events.emit('redo'));
     Mousetrap.bind('shift+a', () => this.events.emit('add'));
     Mousetrap.bind('g', () => this.events.emit('transform', 'g'));
     Mousetrap.bind('r', () => this.events.emit('transform', 'r'));
@@ -160,6 +193,12 @@ class Editor extends Scene {
         document.activeElement.blur();
       }
     });
+
+    // Undo/Redo
+    R.fromEvents(this.events, 'undo')
+      .onValue(() => {
+        this.model.rewind();
+      });
 
 
     // Transform
