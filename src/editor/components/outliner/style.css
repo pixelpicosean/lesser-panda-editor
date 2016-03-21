@@ -1,0 +1,118 @@
+.outliner {
+  height: 50%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.outliner > header {
+  font-size: 16px;
+  height: 32px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tree {
+  flex: 1;
+
+  overflow-y: scroll;
+
+  padding: 0 0 0 20px;
+}
+
+.tree li {
+  position: relative;
+  margin-left: -15px;
+  list-style: none;
+
+  height: 22px;
+}
+
+.tree li input + ol {
+  background: url(./toggle-expand.png) 40px 0 no-repeat;
+  margin: -0.938em 0 0 -44px; /* 15px */
+  display: block;
+  height: 1em;
+}
+
+.tree li input + ol > li {
+  display: none;
+  margin-left: -14px !important;
+  padding-left: 1px;
+}
+
+.tree li input:checked + ol {
+  background: url(./toggle.png) 40px 5px no-repeat;
+  margin: -1.25em 0 0 -44px; /* 20px */
+  padding: 1.563em 0 0 80px;
+  height: auto;
+}
+.tree li input:checked + ol > li {
+  display: block;
+  margin: 0 0 0.125em;  /* 2px */
+}
+.tree li input:checked + ol > li:last-child {
+  margin: 0 0 0.063em; /* 1px */
+}
+
+.children > li {
+  display: none;
+  margin-left: -14px !important;
+  padding-left: 1px;
+}
+
+.toggle {
+  position: absolute;
+  left: 0;
+  margin-left: 0;
+  opacity: 0;
+  z-index: 2;
+  cursor: pointer;
+  height: 1em;
+  width: 1em;
+  top: 0;
+}
+
+.name {
+  cursor: pointer;
+  display: block;
+  padding-left: 37px;
+}
+
+/* Theme */
+.outliner {
+  background-color: rgb(17, 17, 17);
+  color: #9f9f9f;
+}
+
+.outliner > header {
+  background-color: #222;
+}
+
+.tree {
+  background-color: #1d1d1d;
+
+  font-size: 14px;
+}
+
+.tree li {
+  background-color: #313131;
+  border-bottom: 1px solid #222;
+}
+
+/* Icon of different objects */
+.Sprite {
+  background: url(./doc.png) 15px 1px no-repeat;
+}
+.Container {
+  background: url(./folder.png) 15px 1px no-repeat;
+}
+.Text {}
+
+/* States */
+.selected {
+  color: #f0f0f0;
+  background-color: rgba(56, 179, 246, 0.2);
+}
