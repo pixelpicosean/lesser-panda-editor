@@ -45,7 +45,7 @@ export default {
      */
     resolution: {
       retina: true,
-      values: [1],
+      values: [1, 2],
     },
     roundPixels: true,
   },

@@ -108,6 +108,8 @@ import Mousetrap from './mousetrap';
 
 import AssetsPanel from './components/assets-panel';
 
+const SELECT_BOUND_THICKNESS = 1;
+
 class Editor extends Scene {
   constructor() {
     super();
@@ -416,8 +418,13 @@ class Editor extends Scene {
     let g = this.selectRect;
 
     g.clear();
-    g.lineStyle(1, 0x39bdfd);
-    g.drawRect(bounds.x - target.pivot.x, bounds.y - target.pivot.y, bounds.width * target.scale.x, bounds.height * target.scale.y);
+    g.lineStyle(SELECT_BOUND_THICKNESS, 0x39bdfd);
+    g.drawRect(
+      bounds.x - target.pivot.x - SELECT_BOUND_THICKNESS * 0.5,
+      bounds.y - target.pivot.y - SELECT_BOUND_THICKNESS * 0.5,
+      bounds.width * target.scale.x + SELECT_BOUND_THICKNESS,
+      bounds.height * target.scale.y + SELECT_BOUND_THICKNESS
+    );
     g.position.copy(target.position);
     g.rotation = target.rotation;
 
