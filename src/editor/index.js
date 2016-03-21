@@ -123,10 +123,6 @@ class Editor extends Scene {
     this.objLayer = new PIXI.Container().addTo(this.stage);
     this.uiLayer = new PIXI.Container().addTo(this.stage);
 
-    Timer.interval(100, () => {
-      engine.resizeFunc();
-    });
-
     // UI elements
     this.selectRect = new PIXI.Graphics().addTo(this.uiLayer);
     this.selectRect.visible = false;

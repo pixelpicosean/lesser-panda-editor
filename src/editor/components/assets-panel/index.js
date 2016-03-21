@@ -17,6 +17,7 @@ export default class AssetsPanel {
     this.gridHeight = engine.viewSize.y;
     this.gridBottom = 0;
     this.selectCallback = null;
+    this.neverShown = true;
 
     const choose = (key) => {
       if (typeof(this.selectCallback) === 'function') {
@@ -122,6 +123,14 @@ export default class AssetsPanel {
   // API
   show(callback) {
     this.selectCallback = callback;
+
+    // Confirm its size is correct
+    if (this.neverShown) {
+      this.neverShown = false;
+      this.redraw();
+    }
+
+    // Show
     this.panel.visible = true;
 
     this.esc$.onValue(this.hide);
@@ -134,10 +143,8 @@ export default class AssetsPanel {
   }
 
   redraw() {
-    if (this.panel.visible) {
-      this.drawPanel();
-      this.drawGrid();
-    }
+    this.drawPanel();
+    this.drawGrid();
   }
   drawPanel() {
     // Update panel
