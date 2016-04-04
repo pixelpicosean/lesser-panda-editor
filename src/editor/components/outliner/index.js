@@ -1,4 +1,4 @@
-import h from 'editor/snabbdom/h';
+import h from 'snabbdom/h';
 
 import css from './style.css';
 

@@ -7,15 +7,15 @@ import EventEmitter from 'engine/eventemitter3';
 import Vector from 'engine/vector';
 import { removeItems } from 'engine/utils';
 
-import snabbdom from 'editor/snabbdom';
+import snabbdom from 'snabbdom';
 const patch = snabbdom.init([
-  require('editor/snabbdom/modules/class'),
-  require('editor/snabbdom/modules/props'),
-  require('editor/snabbdom/modules/attributes'),
-  require('editor/snabbdom/modules/style'),
-  require('editor/snabbdom/modules/eventlisteners'),
+  require('snabbdom/modules/class'),
+  require('snabbdom/modules/props'),
+  require('snabbdom/modules/attributes'),
+  require('snabbdom/modules/style'),
+  require('snabbdom/modules/eventlisteners'),
 ]);
-import h from 'editor/snabbdom/h';
+import h from 'snabbdom/h';
 
 import Split from 'editor/split';
 
