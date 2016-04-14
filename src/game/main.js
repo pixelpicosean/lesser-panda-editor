@@ -4,7 +4,7 @@ import PIXI from 'engine/pixi';
 import loader from 'engine/loader';
 import 'engine/timeline';
 
-import 'editor';
+import 'editor/scene';
 
 import 'game/loading';
 

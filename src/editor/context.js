@@ -1,7 +1,3 @@
-export default () => {
-  const context = {
-    selected: -1,
-  };
-
-  return context;
-};
+export default () => ({
+  selected: null,
+});

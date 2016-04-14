@@ -1,143 +1,17 @@
-import Renderer from 'engine/renderer';
-import config from 'game/config';
-config.resizeMode = 'crop';
-
-import R from 'engine/reactive';
-import EventEmitter from 'engine/eventemitter3';
-import Vector from 'engine/vector';
-import { removeItems } from 'engine/utils';
-
-import snabbdom from 'snabbdom';
-const patch = snabbdom.init([
-  require('snabbdom/modules/class'),
-  require('snabbdom/modules/props'),
-  require('snabbdom/modules/attributes'),
-  require('snabbdom/modules/style'),
-  require('snabbdom/modules/eventlisteners'),
-]);
-import h from 'snabbdom/h';
-
-import Split from 'editor/split';
-
-import css from './style.css';
-
-// Model
-import context from './context';
-import data from './data';
-
-// Operators
-import ops from './ops';
-import './ops/object';
-
-// Components
-import outliner from './components/outliner';
-import inspector from './components/inspector';
-
-const init = (view2d) => {
-  let model = {
-    context: context(),
-    data: data(),
-    view2d: view2d,
-
-    // Undo support
-    rewindIdx: 0, // [... 3, 2, 1] 0(current)
-    rewindQueue: [],
-
-    rewind: () => {
-      if (model.rewindIdx < model.rewindQueue.length - 1) {
-        model.rewindIdx += 1;
-
-        let act = model.rewindQueue[model.rewindQueue.length - model.rewindIdx];
-        act.action(model, act.param);
-      }
-      else {
-        console.log('[Dev] can not rewind any more');
-      }
-    },
-  };
-
-  view2d.model = model;
-
-  return model;
-};
-
-// Operation dispatcher
-let emitter;
-const index = (o, i) => (o ? o[i] : undefined);
-const operate = (actStr, param) => {
-  let operator = actStr.split('.').reduce(index, ops);
-  if (operator) {
-    emitter.emit({ operator, param });
-  }
-  else {
-    emitter.error(`WARNING: operator "${actStr}" not found`);
-  }
-};
-
-// Action stream
-const actions$ = R.stream(e => emitter = e);
-
-// Editor factory
-const editor = (elm, view2d) => {
-
-  // Editor view
-  const view = (model) => h(`section.${css.sidebar}`, {
-    hook: {
-      key: 'sidebar',
-      insert: (vnode) => {
-        if (vnode.elm.hasChildNodes()) {
-          Split(Array.prototype.slice.call(vnode.elm.childNodes), {
-            direction: 'vertical',
-            minSize: 20,
-          });
-        }
-      },
-    },
-  }, [
-    outliner(model, operate),
-    inspector(model, operate),
-  ]);
-
-  // Logic stream
-  actions$
-    // Update
-    .scan((model, act) => {
-      let rewindData = act.operator.execute(model, act.param);
-      // The operation can be undo
-      if (act.operator.rewindable) {
-        // Delete undo histories that cannot be reached any more
-        if (model.rewindIdx > 0) {
-          removeItems(model.rewindQueue, model.rewindQueue.length - model.rewindIdx + 1);
-        }
-        // Reset rewind index to default
-        model.rewindIdx = 0;
-        // Add a new rewind item to the history
-        model.rewindQueue.push({
-          action: act.operator.rewind,
-          param: rewindData,
-        });
-      }
-      return model;
-    }, init(view2d))
-    // View
-    .map(view)
-    // Apply to editor element
-    .scan(patch, elm)
-    // Logging
-    .onError(err => console.log(err));
-
-};
-
-// Editor scene
 import engine from 'engine/core';
 import Scene from 'engine/scene';
 import PIXI from 'engine/pixi';
 import Timer from 'engine/timer';
+import EventEmitter from 'engine/eventemitter3';
+import R from 'engine/reactive';
+import Vector from 'engine/vector';
 import loader from 'engine/loader';
 
 import Mousetrap from './mousetrap';
 
 import AssetsPanel from './components/assets-panel';
+
+import editor from './editor';
 
 const SELECT_BOUND_THICKNESS = 1;
 
@@ -147,7 +21,8 @@ class Editor extends Scene {
 
     // States
     this.events = new EventEmitter();
-    this.model = null;
+
+    this.operate = null;
 
     this.instMap = {};
     this.selectedInst = null;
@@ -161,10 +36,17 @@ class Editor extends Scene {
     this.selectRect = new PIXI.Graphics().addTo(this.uiLayer);
     this.selectRect.visible = false;
 
-    this.assetsPanel = new AssetsPanel(this, this.uiLayer, operate);
+    this.assetsPanel = null;
 
     // Create sidebar
-    editor(document.getElementById('container'), this);
+    editor(document.getElementById('container'), (operate) => {
+      this.operate = operate;
+      this.assetsPanel = new AssetsPanel(this, this.uiLayer, this.operate);
+
+      return (model) => {
+        this.updateView(model);
+      };
+    });
 
     // Bind shortcuts
     Mousetrap.bind('esc', () => this.events.emit('esc'));
@@ -197,7 +79,7 @@ class Editor extends Scene {
     // Undo/Redo
     R.fromEvents(this.events, 'undo')
       .onValue(() => {
-        this.model.rewind();
+        // this.model.rewind();
       });
 
 
@@ -281,8 +163,8 @@ class Editor extends Scene {
         let inst = this.instMap[id];
 
         // TODO: Group update
-        operate('object.UPDATE', ['x', inst.position.x]);
-        operate('object.UPDATE', ['y', inst.position.y]);
+        this.operate('object.UPDATE', ['x', inst.position.x]);
+        this.operate('object.UPDATE', ['y', inst.position.y]);
       });
     // Cancle translate
     cancelTransform$
@@ -323,7 +205,7 @@ class Editor extends Scene {
         let model = this.model.data.getObjectById(id);
         let inst = this.instMap[id];
 
-        operate('object.UPDATE', ['rotation', inst.rotation]);
+        this.operate('object.UPDATE', ['rotation', inst.rotation]);
       });
     // Cancle translate
     cancelTransform$
@@ -366,8 +248,8 @@ class Editor extends Scene {
         let inst = this.instMap[id];
 
         // TODO: group operation
-        operate('object.UPDATE', ['scale.x', inst.scale.x]);
-        operate('object.UPDATE', ['scale.y', inst.scale.y]);
+        this.operate('object.UPDATE', ['scale.x', inst.scale.x]);
+        this.operate('object.UPDATE', ['scale.y', inst.scale.y]);
       });
     // Cancle translate
     cancelTransform$
@@ -386,7 +268,7 @@ class Editor extends Scene {
     // Actions
     const insertSprite = (key) => {
       console.log(`insertSprite: ${key}`);
-      operate('object.ADD', {
+      this.operate('object.ADD', {
         type: 'Sprite',
         x: 0, y: 0,
         texture: key,
@@ -395,8 +277,8 @@ class Editor extends Scene {
 
     // Event handlers
     this.handlers = {
-      select: (id) => operate('object.SELECT', id),
-      add: () => operate('ui.SHOW_ASSETS', insertSprite),
+      select: (id) => this.operate('object.SELECT', id),
+      add: () => this.operate('ui.SHOW_ASSETS', insertSprite),
     };
   }
   awake() {
@@ -408,7 +290,7 @@ class Editor extends Scene {
 
 
     // Tests
-    operate('object.ADD', {
+    this.operate('object.ADD', {
       type: 'Text',
       name: 'info_text',
       x: 40,
@@ -421,10 +303,10 @@ class Editor extends Scene {
     });
 
     Timer.later(60, () => {
-      operate('object.SELECT', 0);
+      this.operate('object.SELECT', ['data', 'children', 0]);
     });
   }
-  exit() {
+  freeze() {
     // Remove shortcut handlers
     Mousetrap.unbind('esc');
     Mousetrap.unbind('shift+a');
@@ -437,6 +319,13 @@ class Editor extends Scene {
       .offValue(this.handlers.select);
     this.add$
       .offValue(this.handlers.add);
+  }
+
+  updateView(model) {
+    let children = model.getIn(['data', 'children']).toJS();
+    for (let i = 0; i < children.length; i++) {
+      console.log(`update model with id: ${children[i].id}`);
+    }
   }
 
   // APIs

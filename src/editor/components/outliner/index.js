@@ -9,8 +9,7 @@ let operate;
 let data;
 let selectedId = -1;
 
-const viewItem = (objId) => {
-  let obj = data.getObjectById(objId);
+const viewItem = (obj) => {
   if (!obj) return;
 
   return h(`li`, [
@@ -22,10 +21,14 @@ const viewItem = (objId) => {
 
 export default (model, op) => {
   operate = op;
-  data = model.data;
-  selectedId = model.context.selected;
+  data = model.get('data');
+  selectedId = -1;
+  let path = model.getIn(['context', 'selected']);
+  if (path) {
+    selectedId = model.getIn(path).get('id');
+  }
   return h(`section.${css.outliner}`, [
     h('header', 'OUTLINER'),
-    h(`ol.${css.tree}`, model.data.children.map(viewItem)),
+    h(`ol.${css.tree}`, data.get('children').toJS().map(viewItem)),
   ]);
 };

@@ -112,7 +112,10 @@ const view = (obj, op) => {
 
 export default (model, op) => {
   operate = op;
-  let obj = model.data.getObjectById(model.context.selected);
+  let obj, path = model.getIn(['context', 'selected']);
+  if (path) {
+    obj = model.getIn(path).toJS();
+  }
 
   return h(`section.${css.inspector}`, [
     h('header', 'INSPECTOR'),
