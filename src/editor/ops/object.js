@@ -69,8 +69,8 @@ ops.registerOperator('object', 'ADD', {
     }
 
     return model.updateIn(childPath, (arr) => {
-      obj.cursor = childPath.push(arr.size);
-      console.log(`obj.cursor: ${obj.cursor}`);
+      childPath.push(arr.size);
+      obj.cursor = childPath;
       return arr.push(Immutable.fromJS(obj));
     });
   },
