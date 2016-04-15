@@ -2,8 +2,6 @@ import ops from './index';
 import Timer from 'engine/timer';
 import { removeItems } from 'engine/utils';
 
-import Immutable from 'immutable';
-
 let nextObjId = 0;
 const createContainer = ({ name, x, y, parent = -1 }) => ({
   id: nextObjId++,
@@ -48,31 +46,30 @@ const factoryMethods = {
 ops.registerOperator('object', 'SELECT', {
   rewindable: false,
   execute: (model, param) => {
-    return model.updateIn(['context', 'selected'], () => param);
+    return model.context.set('selected', param);
   },
 });
 
 ops.registerOperator('object', 'ADD', {
   rewindable: true,
   execute: (model, param) => {
+    console.log('ADD');
+
     // Create object instance
     const obj = factoryMethods[param.type](param);
 
+    // Save to object store
+    model.data.objects.set(obj.id, obj);
+
     // Add as child of current selected object
-    let childPath, parentPath = model.getIn(['context', 'selected']);
-    if (parentPath) {
-      childPath = parentPath.slice().push('children');
+    let parent = model.context.selected;
+    if (parent !== -1) {
+      model.data.objects[parent].children.push(obj.id);
     }
     // Add to root if no object is selected
     else {
-      childPath = ['data', 'children'];
+      model.data.children.push(obj.id);
     }
-
-    return model.updateIn(childPath, (arr) => {
-      childPath.push(arr.size);
-      obj.cursor = childPath;
-      return arr.push(Immutable.fromJS(obj));
-    });
   },
 });
 

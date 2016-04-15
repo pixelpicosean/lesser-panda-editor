@@ -18,7 +18,7 @@ import Split from 'editor/split';
 
 import css from './style.css';
 
-import Immutable from 'immutable';
+import Freezer from 'freezer-js';
 
 // Model
 import context from './context';
@@ -32,32 +32,35 @@ import './ops/object';
 import outliner from './components/outliner';
 import inspector from './components/inspector';
 
-const init = () => Immutable.fromJS({
+const init = () => (new Freezer({
   context: context(),
   data: data(),
-});
-
-// Operation dispatcher
-let emitter;
-const index = (o, i) => (o ? o[i] : undefined);
-const operate = (actStr, param) => {
-  let operator = actStr.split('.').reduce(index, ops);
-  if (operator) {
-    emitter.emit({ operator, param });
-  }
-  else {
-    emitter.error(`WARNING: operator "${actStr}" not found`);
-  }
-};
-
-// Action stream
-const actions$ = R.stream(e => emitter = e);
+}, {
+  // live: true,
+}));
 
 // Editor factory
 const editor = (elm, view2d) => {
 
+  // Store
+  const store = init();
+  const state$ = R.fromEvents(store, 'update')
+    .toProperty(() => store.get());
+
+  // Operation dispatcher
+  const index = (o, i) => (o ? o[i] : undefined);
+  const operate = (actStr, param) => {
+    let operator = actStr.split('.').reduce(index, ops);
+    if (operator) {
+      operator.execute(store.get(), param);
+    }
+    else {
+      console.log(`WARNING: operator "${actStr}" not found`);
+    }
+  };
+
   // Editor view
-  const view = (model) => h(`section.${css.sidebar}`, {
+  const view = (state) => h(`section.${css.sidebar}`, {
     hook: {
       key: 'sidebar',
       insert: (vnode) => {
@@ -70,20 +73,15 @@ const editor = (elm, view2d) => {
       },
     },
   }, [
-    outliner(model, operate),
-    inspector(model, operate),
+    outliner(state, operate),
+    inspector(state, operate),
   ]);
 
-  // Model events
-  const model$ = actions$.scan((model, act) => {
-    return act.operator.execute(model, act.param);
-  }, init());
-
   // Update DOM view
-  model$.map(view).scan(patch, elm).onError(err => console.log(err));
+  state$.map(view).scan(patch, elm).onError(err => console.log(err));
 
   // Update View2D
-  model$.map(view2d(operate)).onError(err => console.log(err));
+  state$.map(view2d(operate)).onError(err => console.log(err));
 };
 
 export default editor;

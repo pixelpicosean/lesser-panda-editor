@@ -6,5 +6,7 @@ export default () => {
   return {
     /* Children of current root prefeb */
     children: [],
+    /* Store real data of objects, with their ids as keys */
+    objects: {},
   };
 };

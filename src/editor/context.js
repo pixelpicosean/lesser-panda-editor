@@ -1,3 +1,3 @@
 export default () => ({
-  selected: null,
+  selected: -1,
 });
