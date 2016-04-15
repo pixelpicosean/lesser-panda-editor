@@ -29,6 +29,6 @@ export default (model, op) => {
   }
   return h(`section.${css.outliner}`, [
     h('header', 'OUTLINER'),
-    h(`ol.${css.tree}`, data.get('children').map(viewItem)),
+    h(`ol.${css.tree}`, data.get('children').toArray().map(viewItem)),
   ]);
 };
