@@ -1,5 +1,6 @@
 import engine from 'engine/core';
 import Scene from 'engine/scene';
+import Renderer from 'engine/renderer';
 import PIXI from 'engine/pixi';
 import Timer from 'engine/timer';
 import EventEmitter from 'engine/eventemitter3';
@@ -12,6 +13,93 @@ import Mousetrap from './mousetrap';
 import AssetsPanel from './components/assets-panel';
 
 import editor from './editor';
+
+// Instance factory
+const creators = {
+  container(obj) {
+    let inst = new PIXI.Container();
+
+    inst.id = obj.id;
+    inst.type = obj.type;
+    inst.name = obj.name;
+    inst.position.copy(obj);
+    inst.rotation = obj.rotation;
+    inst.scale.copy(obj.scale);
+    inst.alpha = obj.alpha;
+    inst.pivot.copy(obj.pivot);
+    inst.skew.copy(obj.skew);
+    inst.visible = obj.visible;
+
+    return inst;
+  },
+  sprite: function(obj) {
+    let inst = new PIXI.Sprite(PIXI.Texture.fromAsset(obj.texture));
+
+    inst.id = obj.id;
+    inst.type = obj.type;
+    inst.name = obj.name;
+    inst.position.copy(obj);
+    inst.rotation = obj.rotation;
+    inst.scale.copy(obj.scale);
+    inst.alpha = obj.alpha;
+    inst.anchor.copy(obj.anchor);
+    inst.pivot.copy(obj.pivot);
+    inst.skew.copy(obj.skew);
+    inst.visible = obj.visible;
+
+    return inst;
+  },
+  text: function(obj) {
+    let inst = new PIXI.Text(obj.text, Object.assign({}, obj.style), window.devicePixelRatio);
+
+    inst.id = obj.id;
+    inst.type = obj.type;
+    inst.name = obj.name;
+    inst.position.copy(obj);
+    inst.rotation = obj.rotation;
+    inst.scale.copy(obj.scale);
+    inst.alpha = obj.alpha;
+    inst.anchor.copy(obj.anchor);
+    inst.pivot.copy(obj.pivot);
+    inst.skew.copy(obj.skew);
+    inst.visible = obj.visible;
+
+    return inst;
+  },
+};
+
+const updaters = {
+  container: function(inst, model) {
+    inst.name = model.name;
+    inst.x = model.x;
+    inst.y = model.y;
+    inst.rotation = model.rotation,
+    inst.scale.copy(model.scale);
+    inst.alpha = model.alpha;
+    inst.pivot.copy(model.pivot);
+    inst.skew.copy(model.skew);
+    inst.visible = model.visible;
+  },
+  sprite: function(inst, model) {
+    updaters.container(inst, model);
+
+    inst.anchor.copy(model.anchor);
+    inst.blendMode = PIXI.BLEND_MODES[model.blendMode];
+    inst.texture = model.texture;
+  },
+  text: function(inst, model) {
+    updaters.container(inst, model);
+
+    inst.anchor.copy(model.anchor);
+    inst.blendMode = PIXI.BLEND_MODES[model.blendMode];
+    inst.text = model.text;
+    inst.style.font = model.style.font;
+    inst.style.fill = model.style.fill;
+
+    // Force redraw
+    inst.dirty = true;
+  },
+};
 
 const SELECT_BOUND_THICKNESS = 1;
 
@@ -161,10 +249,7 @@ class Editor extends Scene {
     confirmTransform$
       .filterBy(isTranslating$)
       .onValue(() => {
-        let id = this.model.context.selected;
-
-        let model = this.model.data.getObjectById(id);
-        let inst = this.instMap[id];
+        let inst = this.instMap[this.prevSelected];
 
         // TODO: Group update
         this.operate('object.UPDATE', ['x', inst.position.x]);
@@ -174,9 +259,9 @@ class Editor extends Scene {
     cancelTransform$
       .filterBy(isTranslating$)
       .onValue(() => {
-        let id = this.model.context.selected;
+        let id = this.prevSelected;
 
-        let model = this.model.data.getObjectById(id);
+        let model = this.model.data.objects[id];
         let inst = this.instMap[id];
 
         inst.position.x = model.x;
@@ -204,10 +289,7 @@ class Editor extends Scene {
     confirmTransform$
       .filterBy(isRotating$)
       .onValue(() => {
-        let id = this.model.context.selected;
-
-        let model = this.model.data.getObjectById(id);
-        let inst = this.instMap[id];
+        let inst = this.instMap[this.prevSelected];
 
         this.operate('object.UPDATE', ['rotation', inst.rotation]);
       });
@@ -215,9 +297,9 @@ class Editor extends Scene {
     cancelTransform$
       .filterBy(isRotating$)
       .onValue(() => {
-        let id = this.model.context.selected;
+        let id = this.prevSelected;
 
-        let model = this.model.data.getObjectById(id);
+        let model = this.model.data.objects[id];
         let inst = this.instMap[id];
 
         inst.rotation = model.rotation;
@@ -246,10 +328,7 @@ class Editor extends Scene {
     confirmTransform$
       .filterBy(isScaling$)
       .onValue(() => {
-        let id = this.model.context.selected;
-
-        let model = this.model.data.getObjectById(id);
-        let inst = this.instMap[id];
+        let inst = this.instMap[this.prevSelected];
 
         // TODO: group operation
         this.operate('object.UPDATE', ['scale.x', inst.scale.x]);
@@ -259,9 +338,9 @@ class Editor extends Scene {
     cancelTransform$
       .filterBy(isRotating$)
       .onValue(() => {
-        let id = this.model.context.selected;
+        let id = this.prevSelected;
 
-        let model = this.model.data.getObjectById(id);
+        let model = this.model.data.objects[id];
         let inst = this.instMap[id];
 
         inst.scale.copy(model.scale);
@@ -305,7 +384,7 @@ class Editor extends Scene {
         },
         text: 'It Works!',
       });
-      this.operate('object.SELECT', 0);
+      // this.operate('object.SELECT', 0);
     }, 100);
   }
   freeze() {
@@ -324,21 +403,54 @@ class Editor extends Scene {
   }
 
   updateView(model) {
+    console.log(this.model === model ? 'model not changed' : 'model changed');
+    this.model = model;
+
     // Objects are changed
     if (this.prevObjects !== model.data.objects) {
       console.log('update objects view');
       this.prevObjects = model.data.objects;
+
+      // Update instances
+      for (let k in model.data.objects) {
+        this.updateInstance(k, model.data.objects[k]);
+      }
+      // Remove non-exist instances
+      for (let k in this.instMap) {
+        if (!model.data.objects.hasOwnProperty(k)) {
+          this.instMap[k].remove();
+          delete this.instMap[k];
+        }
+      }
     }
 
     if (this.prevChildren !== model.data.children) {
       console.log('update scene tree');
       this.prevChildren = model.data.children;
+
+      // TODO: update hierarchy
     }
 
-    // Selected object is changed
-    if (this.prevSelected !== model.context.selected) {
-      console.log('update selected');
-      this.prevSelected = model.context.selected;
+    // Update select display
+    this.prevSelected = model.context.selected;
+    Timer.later(40, () => {
+      this.select(model.context.selected);
+    });
+  }
+  updateInstance(id, model) {
+    let inst = this.instMap[id];
+    // Update exist instances
+    if (inst) {
+      updaters[model.type](inst, model);
+    }
+    // Create new instances
+    else {
+      inst = creators[model.type](model).addTo(this.objLayer);
+      this.instMap[id] = inst;
+      // TODO: only enable this on selectable objects
+      if (model.type !== 'container') {
+        this.enableClickSelect(inst);
+      }
     }
   }
 
@@ -360,6 +472,8 @@ class Editor extends Scene {
     parent.addChild(target);
   }
   select(id) {
+    if (id === -1) return;
+
     this.selectedInst = this.instMap[id];
     this.updateRectOf(id);
   }
@@ -380,62 +494,6 @@ class Editor extends Scene {
     g.rotation = target.rotation;
 
     g.visible = true;
-  }
-
-  // Instance factory
-  createContainer(obj) {
-    let inst = new PIXI.Container().addTo(this.objLayer);
-
-    inst.id = obj.id;
-    inst.type = obj.type;
-    inst.name = obj.name;
-    inst.position.copy(obj);
-    inst.rotation = obj.rotation;
-    inst.scale.copy(obj.scale);
-    inst.alpha = obj.alpha;
-    inst.pivot.copy(obj.pivot);
-    inst.skew.copy(obj.skew);
-    inst.visible = obj.visible;
-
-    return inst;
-  }
-  createSprite(obj) {
-    let inst = new PIXI.Sprite(PIXI.Texture.fromAsset(obj.texture)).addTo(this.objLayer);
-
-    inst.id = obj.id;
-    inst.type = obj.type;
-    inst.name = obj.name;
-    inst.position.copy(obj);
-    inst.rotation = obj.rotation;
-    inst.scale.copy(obj.scale);
-    inst.alpha = obj.alpha;
-    inst.anchor.copy(obj.anchor);
-    inst.pivot.copy(obj.pivot);
-    inst.skew.copy(obj.skew);
-    inst.visible = obj.visible;
-
-    this.enableClickSelect(inst);
-
-    return inst;
-  }
-  createText(obj) {
-    let inst = new PIXI.Text(obj.text, obj.style, window.devicePixelRatio).addTo(this.objLayer);
-
-    inst.id = obj.id;
-    inst.type = obj.type;
-    inst.name = obj.name;
-    inst.position.copy(obj);
-    inst.rotation = obj.rotation;
-    inst.scale.copy(obj.scale);
-    inst.alpha = obj.alpha;
-    inst.anchor.copy(obj.anchor);
-    inst.pivot.copy(obj.pivot);
-    inst.skew.copy(obj.skew);
-    inst.visible = obj.visible;
-
-    this.enableClickSelect(inst);
-
-    return inst;
   }
 
   // Helpers
