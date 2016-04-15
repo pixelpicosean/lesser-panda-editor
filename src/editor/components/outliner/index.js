@@ -13,9 +13,9 @@ const viewItem = (obj) => {
   if (!obj) return;
 
   return h(`li`, [
-    h(`label.${css.name}.${css[obj.type]}${selectedId === obj.id ? '.' + css.selected : ''}`, { on: { click: [operate, 'object.SELECT', obj.id] } }, obj.name),
+    h(`label.${css.name}.${css[obj.get('type')]}${selectedId === obj.get('id') ? '.' + css.selected : ''}`, { on: { click: [operate, 'object.SELECT', obj.get('id')] } }, obj.get('name')),
     h(`input.${css.toggle}`, { props: { type: 'checkbox' } }),
-    h(`ol`, (obj.children || EMPTY).map(viewItem)),
+    h(`ol`, (obj.get('children') || EMPTY).map(viewItem)),
   ]);
 };
 
@@ -29,6 +29,6 @@ export default (model, op) => {
   }
   return h(`section.${css.outliner}`, [
     h('header', 'OUTLINER'),
-    h(`ol.${css.tree}`, data.get('children').toJS().map(viewItem)),
+    h(`ol.${css.tree}`, data.get('children').map(viewItem)),
   ]);
 };
