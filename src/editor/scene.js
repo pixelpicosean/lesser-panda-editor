@@ -293,9 +293,9 @@ class Editor extends Scene {
       .onValue(this.handlers.add);
 
     // Tests
-    Timer.later(100, () => {
+    setTimeout(() => {
       this.operate('object.ADD', {
-        type: 'Text',
+        type: 'text',
         name: 'info_text',
         x: 40,
         y: 200,
@@ -306,7 +306,7 @@ class Editor extends Scene {
         text: 'It Works!',
       });
       this.operate('object.SELECT', 0);
-    });
+    }, 100);
   }
   freeze() {
     // Remove shortcut handlers

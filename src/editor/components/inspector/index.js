@@ -48,7 +48,7 @@ const number = (key, value) => {
 };
 
 const views = {
-  Container: (c, op) =>([
+  container: (c, op) =>([
     readonly('type', type),
     text('name', name),
     number('x', x),
@@ -64,7 +64,7 @@ const views = {
     // toggle('visible', true),
   ]),
 
-  Sprite: (sprite, op) => ([
+  sprite: (sprite, op) => ([
     readonly('type', sprite.type),
     text('name', sprite.name),
     number('x', sprite.x),
@@ -82,7 +82,7 @@ const views = {
     // toggle('visible', true),
   ]),
 
-  Text: (t, op) => ([
+  text: (t, op) => ([
     readonly('type', t.type),
     text('name', t.name),
     text('text', t.text),
