@@ -24,6 +24,10 @@ class Editor extends Scene {
 
     this.operate = null;
 
+    this.prevSelected;
+    this.prevChildren;
+    this.prevObjects;
+
     this.instMap = {};
     this.selectedInst = null;
 
@@ -39,14 +43,14 @@ class Editor extends Scene {
     this.assetsPanel = null;
 
     // Create sidebar
-    // editor(document.getElementById('container'), (operate) => {
-    //   this.operate = operate;
-    //   this.assetsPanel = new AssetsPanel(this, this.uiLayer, this.operate);
+    editor(document.getElementById('container'), (operate) => {
+      this.operate = operate;
+      this.assetsPanel = new AssetsPanel(this, this.uiLayer, this.operate);
 
-    //   return (model) => {
-    //     this.updateView(model);
-    //   };
-    // });
+      return (model) => {
+        this.updateView(model);
+      };
+    });
 
     // Bind shortcuts
     Mousetrap.bind('esc', () => this.events.emit('esc'));
@@ -288,29 +292,7 @@ class Editor extends Scene {
     this.add$
       .onValue(this.handlers.add);
 
-
     // Tests
-    // this.operate('object.ADD', {
-    //   type: 'Text',
-    //   name: 'info_text',
-    //   x: 40,
-    //   y: 200,
-    //   style: {
-    //     font: 'bold 64px Arial',
-    //     fill: 'white',
-    //   },
-    //   text: 'It Works!',
-    // });
-
-    editor(document.getElementById('container'), (operate) => {
-      this.operate = operate;
-      this.assetsPanel = new AssetsPanel(this, this.uiLayer, this.operate);
-
-      return (model) => {
-        this.updateView(model);
-      };
-    });
-
     Timer.later(100, () => {
       this.operate('object.ADD', {
         type: 'Text',
@@ -342,9 +324,21 @@ class Editor extends Scene {
   }
 
   updateView(model) {
-    let children = model.data.children;
-    for (let i = 0; i < children.length; i++) {
-      console.log(`update model with id: ${children[i].id}`);
+    // Objects are changed
+    if (this.prevObjects !== model.data.objects) {
+      console.log('update objects view');
+      this.prevObjects = model.data.objects;
+    }
+
+    if (this.prevChildren !== model.data.children) {
+      console.log('update scene tree');
+      this.prevChildren = model.data.children;
+    }
+
+    // Selected object is changed
+    if (this.prevSelected !== model.context.selected) {
+      console.log('update selected');
+      this.prevSelected = model.context.selected;
     }
   }
 
