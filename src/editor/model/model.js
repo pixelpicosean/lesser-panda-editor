@@ -2,53 +2,55 @@ export const models = {};
 
 let nextObjId = 0;
 
-export const defaultCreator = (model, settings) => {
-  let state = {
-    id: nextObjId++,
-    name: model.type,
-  };
-  let i, prop;
-  for (i = 2; i < model.props.length; i++) {
-    prop = model.props[i];
-    state[prop.type] = prop.initValue;
-  }
-
-  return Object.assign(state, settings);
-};
-
-export const defaultUpdator = (state, param) => {
-  state.set(param[0], param[1]);
-};
-
-export const defaultInstCreator = (state, settings) => {
-
-};
-
-export const defaultInstUpdator = (state, settings) => {
-
-};
-
 class Model {
-  constructor(type, parentType) {
+  constructor(type, parentTypeOrModel) {
     this.type = type;
+    this.parent;
 
     this.props = [];
+    this.propKeys = [];
 
     this.text('type', type, true);
     this.text('name', type);
 
-    if (models.hasOwnProperty(parentType)) {
-      this.props = this.props.concat(models[parentType].props.slice(2));
+    // Has parent type
+    if (parentTypeOrModel) {
+      // Parent type is a string
+      if (typeof(parentTypeOrModel) === 'string' && models[parentTypeOrModel]) {
+        this.parent = models[parentTypeOrModel];
+      }
+      // Parent type is a model
+      else if (parentTypeOrModel instanceof Model) {
+        this.parent = parentTypeOrModel;
+        // Save the parent type to registry if not exist yet
+        if (!models.hasOwnProperty(parentTypeOrModel.type)) {
+          models[parentTypeOrModel.type] = parentTypeOrModel;
+        }
+      }
     }
 
-    this.creator = defaultCreator;
-    this.updator = defaultUpdator;
+    if (this.parent) {
+      this.props = this.props.concat(this.parent.props.slice(2));
+      this.propKeys = this.propKeys.concat(this.parent.propKeys.slice(2));
+    }
 
-    this.instCreate = defaultInstCreator;
-    this.instUpdate = defaultInstUpdator;
+    // Override these functions PLZ
+    this.instCreator = () => {
+      console.log(`Cannot create "${this.type}" instances`);
+    };
+    this.instUpdator = () => {
+      console.log(`Cannot update "${this.type}" instances`);
+    };
   }
   prop(type, key, initValue, readonly = false) {
+    if (this.propKeys.indexOf(key) !== -1) {
+      console.log(`Property "${key}" is already defined!`);
+      return this;
+    }
+
     this.props.push({ type, key, initValue, readonly });
+    this.propKeys.push(key);
+
     return this;
   }
 
@@ -69,39 +71,60 @@ class Model {
     return this.prop('vector', key, initValue);
   }
 
-  // Method to setup creator/updator
-  creator(create) {
-    this.create = create;
+  // Method to setup instance creator/updator
+  setInstCreator(creator) {
+    this.instCreator = creator;
     return this;
   }
-  updater(update) {
-    this.update = update;
-    return this;
-  }
-  instCreator(create) {
-    this.instCreate = create;
-    return this;
-  }
-  instUpdater(update) {
-    this.instUpdate = update;
+  setInstUpdator(updator) {
+    this.instUpdator = updator;
     return this;
   }
 
   // API
   create(settings) {
-    return this.creator(this, settings);
+    let state = {
+      id: nextObjId++,
+      type: this.type,
+      name: this.type,
+    };
+    let i, prop;
+    for (i = 2; i < this.props.length; i++) {
+      prop = this.props[i];
+      state[prop.key] = (settings[prop.key] !== undefined) ? settings[prop.key] : prop.initValue;
+    }
+
+    console.log(`create ${this.type} with ${this.props.length} props`);
+
+    return state;
   }
   update(state, param) {
-    return this.updator(state, param);
+    if (this.propKeys.indexOf(param[0]) !== -1) {
+      state.set(param[0], param[1]);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  createInst(state) {
+    return this.instCreator(state);
+  }
+  updateInst(state, inst) {
+    if (this.parent) {
+      this.parent.updateInst(state, inst);
+    }
+    this.instUpdator(state, inst);
   }
 }
 
-export const model = (type) => {
+export const model = (type, parentType) => {
   if (models.hasOwnProperty(type)) {
     console.log(`Model "${type}" is already defined!`);
     return null;
   }
-  models[type] = new Model(type);
+  models[type] = new Model(type, parentType);
   return models[type];
 };
 
