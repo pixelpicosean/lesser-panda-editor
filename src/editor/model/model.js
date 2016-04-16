@@ -64,7 +64,7 @@ class Model {
   text(key, initValue = '', readonly = false) {
     return this.prop('text', key, initValue, readonly);
   }
-  color(key, initValue = 0x000000, readonly = false) {
+  color(key, initValue = '0x000000', readonly = false) {
     return this.prop('color', key, initValue, readonly);
   }
   vector(key, initValue = { x: 0, y: 0 }, readonly = false) {

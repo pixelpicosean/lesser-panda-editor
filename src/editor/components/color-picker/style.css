@@ -1,0 +1,41 @@
+.picker {
+  width:          30px;
+  height:         30px;
+  position: relative;
+}
+
+.track {
+  background:     #EFEFEF url(./color.png) no-repeat 50% 50%;
+  height:         160px;
+  width:          160px;
+  position:       absolute;
+  cursor:         crosshair;
+  float:          left;
+  left:           -68px;
+  top:            -160px;
+  display:        none;
+  z-index:        10;
+}
+
+.color {
+  margin-right:   4px;
+  width:          24px;
+  height:         24px;
+  display:        block;
+  position:       relative;
+  z-index:        11;
+  background-color: #EFEFEF;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.colorInner {
+  width:          25px;
+  height:         25px;
+  border: 2px solid white;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+}

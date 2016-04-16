@@ -9,7 +9,7 @@ export default model('text', container)
   .number('anchorY')
   .text('blendMode', 'NORMAL')
   .text('font', 'bold 20px Arial')
-  .text('fill', 'black') // TODO: color
+  .color('fill', '#000000')
 
   .setInstCreator(() => {
     return new PIXI.Text('');

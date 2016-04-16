@@ -62,7 +62,7 @@
   color: #999;
 }
 
-.prop > input {
+.prop input {
   width: 100%;
 
   border: 1px solid #313131;
@@ -76,7 +76,7 @@
 
   text-align: right;
 }
-.prop > input:focus {
+.prop input:focus {
   outline: none;
 
   border-color: #38b3f6;
