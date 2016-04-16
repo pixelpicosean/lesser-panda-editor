@@ -56,19 +56,19 @@ class Model {
 
   // Methods to define properties
   boolean(key, initValue = false, readonly = false) {
-    return this.prop('boolean', key, initValue);
+    return this.prop('boolean', key, initValue, readonly);
   }
   number(key, initValue = 0, readonly = false) {
-    return this.prop('number', key, initValue);
+    return this.prop('number', key, initValue, readonly);
   }
   text(key, initValue = '', readonly = false) {
-    return this.prop('text', key, initValue);
+    return this.prop('text', key, initValue, readonly);
   }
   color(key, initValue = 0x000000, readonly = false) {
-    return this.prop('color', key, initValue);
+    return this.prop('color', key, initValue, readonly);
   }
   vector(key, initValue = { x: 0, y: 0 }, readonly = false) {
-    return this.prop('vector', key, initValue);
+    return this.prop('vector', key, initValue, readonly);
   }
 
   // Method to setup instance creator/updator
