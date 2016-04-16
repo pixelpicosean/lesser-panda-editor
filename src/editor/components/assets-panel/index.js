@@ -50,7 +50,7 @@ export default class AssetsPanel {
 
       // Sprite
       // TODO: create instance based on its type
-      let g = new PIXI.Sprite(PIXI.Texture.fromAsset(key)).addTo(item);
+      let g = new PIXI.Sprite(loader.resources[key].texture).addTo(item);
       if (g.width >= g.height) {
         g.width = ITEM_SIZE * 0.9;
         g.scale.y = g.scale.x;
