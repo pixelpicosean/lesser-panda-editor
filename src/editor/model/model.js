@@ -94,8 +94,6 @@ class Model {
       state[prop.key] = (settings[prop.key] !== undefined) ? settings[prop.key] : prop.initValue;
     }
 
-    console.log(`create ${this.type} with ${this.props.length} props`);
-
     return state;
   }
   update(state, param) {
@@ -109,7 +107,9 @@ class Model {
   }
 
   createInst(state) {
-    return this.instCreator(state);
+    const inst = this.instCreator();
+    this.updateInst(state, inst);
+    return inst;
   }
   updateInst(state, inst) {
     if (this.parent) {
