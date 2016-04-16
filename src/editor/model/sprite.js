@@ -1,32 +1,20 @@
-/*
-import * as container from './container';
-
-export const create = (id, { name, x, y, parent, texture }) => (Object.assign(container.create(id, { name, x, y, parent }), {
-  type: 'sprite',
-  anchor: { x: 0, y: 0 },
-  blendMode: 'NORMAL',
-  texture: texture,
-}));
-
-export const update = (model, param) => {
-  container.update(model, param);
-
-  const key = param[0];
-  const value = param[1];
-
-  switch (key) {
-    case 'texture':
-    case 'blendMode':
-      model.set(key, value);
-      break;
-    case 'anchor.x':
-      model.anchor.set('x', value);
-      break;
-    case 'anchor.y':
-      model.anchor.set('y', value);
-      break;
-  }
-};
-*/
-
 import { model } from './model';
+import container from './container';
+
+import PIXI from 'engine/pixi';
+import loader from 'engine/loader';
+
+export default model('sprite', container)
+  .number('anchorX')
+  .number('anchorY')
+  .text('blendMode', 'NORMAL')
+  .text('texture', '') // TODO: texture
+
+  .setInstCreator((state) => {
+    return new PIXI.Sprite();
+  })
+  .setInstUpdator((state, inst) => {
+    inst.anchor.set(state.anchorX, state.anchorY);
+    inst.blendMode = PIXI.BLEND_MODES[state.blendMode];
+    inst.texture = loader.resources[state.texture]; // TODO: texture lookup
+  });
