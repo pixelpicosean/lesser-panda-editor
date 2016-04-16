@@ -87,6 +87,8 @@ class Model {
       id: nextObjId++,
       type: this.type,
       name: this.type,
+      children: [],
+      parent: null,
     };
     let i, prop;
     for (i = 2; i < this.props.length; i++) {

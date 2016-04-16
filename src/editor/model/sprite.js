@@ -16,5 +16,5 @@ export default model('sprite', container)
   .setInstUpdator((state, inst) => {
     inst.anchor.set(state.anchorX, state.anchorY);
     inst.blendMode = PIXI.BLEND_MODES[state.blendMode];
-    inst.texture = loader.resources[state.texture]; // TODO: texture lookup
+    inst.texture = loader.resources[state.texture].texture; // TODO: texture lookup
   });

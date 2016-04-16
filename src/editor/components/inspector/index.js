@@ -61,9 +61,7 @@ const prop2View = (prop, state) => {
 };
 
 const view = (obj, op) => {
-  if (viewTypes.hasOwnProperty(obj.type)) {
-    return models[obj.type].props.map((p) => prop2View(p, obj[p.key]));
-  }
+  return models[obj.type].props.map((p) => prop2View(p, obj[p.key]));
 };
 
 export default (model, op) => {

@@ -266,7 +266,7 @@ class Editor extends Scene {
     const insertSprite = (key) => {
       console.log(`insertSprite: ${key}`);
       this.operate('object.ADD', {
-        type: 'Sprite',
+        type: 'sprite',
         x: 0, y: 0,
         texture: key,
       });
