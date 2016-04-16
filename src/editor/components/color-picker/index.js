@@ -26,7 +26,6 @@ class ColorPicker extends EventEmitter {
 
     var context    = null,
       mouseIsDown  = false,
-      hasCanvas    = !!document.createElement("canvas").getContext,
       touchEvents  = "ontouchstart" in document.documentElement;
 
     /**
@@ -52,14 +51,12 @@ class ColorPicker extends EventEmitter {
      * @private
      */
     function _initialize() {
-      if (hasCanvas) {
-        $canvas = document.createElement("canvas");
-        $track.appendChild($canvas);
+      $canvas = document.createElement("canvas");
+      $track.appendChild($canvas);
 
-        context = $canvas.getContext("2d");
+      context = $canvas.getContext("2d");
 
-        _setImage();
-      }
+      _setImage();
 
       _setEvents();
 
@@ -96,61 +93,59 @@ class ColorPicker extends EventEmitter {
     function _setEvents() {
       var eventType = touchEvents ? "touchstart" : "mousedown";
 
-      if (hasCanvas) {
-        $color["on" + eventType] = function(event) {
+      $color["on" + eventType] = function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        $track.style.display = 'block';
+
+        document.onmousedown = function(event) {
+          document.onmousedown = null;
+
+          self.close();
+        };
+      };
+
+      if (!touchEvents) {
+        $canvas.onmousedown = function(event) {
           event.preventDefault();
           event.stopPropagation();
 
-          $track.style.display = 'block';
+          mouseIsDown = true;
 
-          document.onmousedown = function(event) {
-            document.onmousedown = null;
+          _getColorCanvas(event);
+
+          document.onmouseup = function(event) {
+            document.onmouseup = null;
 
             self.close();
+
+            return false;
           };
         };
 
-        if (!touchEvents) {
-          $canvas.onmousedown = function(event) {
-            event.preventDefault();
-            event.stopPropagation();
+        $canvas.onmousemove = _getColorCanvas;
+      }
+      else {
+        $canvas.ontouchstart = function(event) {
+          mouseIsDown = true;
 
-            mouseIsDown = true;
+          _getColorCanvas(event.touches[0]);
 
-            _getColorCanvas(event);
+          return false;
+        };
 
-            document.onmouseup = function(event) {
-              document.onmouseup = null;
+        $canvas.ontouchmove = function(event) {
+          _getColorCanvas(event.touches[0]);
 
-              self.close();
+          return false;
+        };
 
-              return false;
-            };
-          };
+        $canvas.ontouchend = function(event) {
+          self.close();
 
-          $canvas.onmousemove = _getColorCanvas;
-        }
-        else {
-          $canvas.ontouchstart = function(event) {
-            mouseIsDown = true;
-
-            _getColorCanvas(event.touches[0]);
-
-            return false;
-          };
-
-          $canvas.ontouchmove = function(event) {
-            _getColorCanvas(event.touches[0]);
-
-            return false;
-          };
-
-          $canvas.ontouchend = function(event) {
-            self.close();
-
-            return false;
-          };
-        }
+          return false;
+        };
       }
     }
 
