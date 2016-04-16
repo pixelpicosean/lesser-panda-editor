@@ -179,8 +179,7 @@ class Editor extends Scene {
         let model = this.model.data.objects[id];
         let inst = this.instMap[id];
 
-        inst.position.x = model.x;
-        inst.position.y = model.y;
+        models[model.type].updateInst(model, inst);
       });
 
     // Rotate ------------------------------------------------
@@ -200,7 +199,7 @@ class Editor extends Scene {
     rotation$.onValue((rot) => {
       this.selectedInst.rotation = rot;
     });
-    // Confirm translate
+    // Confirm rotate
     confirmTransform$
       .filterBy(isRotating$)
       .onValue(() => {
@@ -208,7 +207,7 @@ class Editor extends Scene {
 
         this.operate('object.UPDATE', ['rotation', inst.rotation]);
       });
-    // Cancle translate
+    // Cancle rotate
     cancelTransform$
       .filterBy(isRotating$)
       .onValue(() => {
@@ -217,7 +216,7 @@ class Editor extends Scene {
         let model = this.model.data.objects[id];
         let inst = this.instMap[id];
 
-        inst.rotation = model.rotation;
+        models[model.type].updateInst(model, inst);
       });
 
     // Scale ------------------------------------------------
@@ -239,17 +238,17 @@ class Editor extends Scene {
     scale$.onValue((scale) => {
       this.selectedInst.scale.copy(scale);
     });
-    // Confirm translate
+    // Confirm scale
     confirmTransform$
       .filterBy(isScaling$)
       .onValue(() => {
         let inst = this.instMap[this.prevSelected];
 
         // TODO: group operation
-        this.operate('object.UPDATE', ['scale.x', inst.scale.x]);
-        this.operate('object.UPDATE', ['scale.y', inst.scale.y]);
+        this.operate('object.UPDATE', ['scaleX', inst.scale.x]);
+        this.operate('object.UPDATE', ['scaleY', inst.scale.y]);
       });
-    // Cancle translate
+    // Cancle scale
     cancelTransform$
       .filterBy(isRotating$)
       .onValue(() => {
@@ -258,7 +257,7 @@ class Editor extends Scene {
         let model = this.model.data.objects[id];
         let inst = this.instMap[id];
 
-        inst.scale.copy(model.scale);
+        models[model.type].updateInst(model, inst);
       });
 
 
