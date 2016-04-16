@@ -1,3 +1,4 @@
+/*
 export const create = (id, { name, x, y, parent = -1 }) => ({
   id: id,
   type: 'container',
@@ -29,3 +30,19 @@ export const update = (model, param) => {
       break;
   }
 };
+*/
+
+import { model } from './model';
+
+model('container')
+  .number('x')
+  .number('y')
+  .number('rotation')
+  .number('scaleX')
+  .number('scaleY')
+  .number('alpha')
+  .number('pivotX')
+  .number('pivotY')
+  .number('skewX')
+  .number('skewY')
+  .boolean('visible', true);
