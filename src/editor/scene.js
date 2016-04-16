@@ -362,9 +362,6 @@ class Editor extends Scene {
       inst = models[state.type].createInst(state).addTo(this.objLayer);
       this.instMap[id] = inst;
 
-      console.log(state);
-      console.log(inst);
-
       // TODO: only enable this on selectable objects
       if (state.type !== 'container') {
         this.enableClickSelect(inst);
