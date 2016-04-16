@@ -108,7 +108,15 @@ class Model {
 
   createInst(state) {
     const inst = this.instCreator();
+
+    // General properties
+    inst.id = state.id;
+    inst.type = state.type;
+    inst.name = state.name;
+
+    // Update custom properties
     this.updateInst(state, inst);
+
     return inst;
   }
   updateInst(state, inst) {

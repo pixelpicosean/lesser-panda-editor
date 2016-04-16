@@ -5,8 +5,8 @@ export default model('container')
   .number('x')
   .number('y')
   .number('rotation')
-  .number('scaleX')
-  .number('scaleY')
+  .number('scaleX', 1)
+  .number('scaleY', 1)
   .number('alpha', 1)
   .number('pivotX')
   .number('pivotY')
@@ -14,7 +14,7 @@ export default model('container')
   .number('skewY')
   .boolean('visible', true)
 
-  .setInstCreator((state) => {
+  .setInstCreator(() => {
     return new PIXI.Container();
   })
   .setInstUpdator((state, inst) => {
