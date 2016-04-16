@@ -14,92 +14,7 @@ import AssetsPanel from './components/assets-panel';
 
 import editor from './editor';
 
-// Instance factory
-const creators = {
-  container(obj) {
-    let inst = new PIXI.Container();
-
-    inst.id = obj.id;
-    inst.type = obj.type;
-    inst.name = obj.name;
-    inst.position.copy(obj);
-    inst.rotation = obj.rotation;
-    inst.scale.copy(obj.scale);
-    inst.alpha = obj.alpha;
-    inst.pivot.copy(obj.pivot);
-    inst.skew.copy(obj.skew);
-    inst.visible = obj.visible;
-
-    return inst;
-  },
-  sprite: function(obj) {
-    let inst = new PIXI.Sprite(PIXI.Texture.fromAsset(obj.texture));
-
-    inst.id = obj.id;
-    inst.type = obj.type;
-    inst.name = obj.name;
-    inst.position.copy(obj);
-    inst.rotation = obj.rotation;
-    inst.scale.copy(obj.scale);
-    inst.alpha = obj.alpha;
-    inst.anchor.copy(obj.anchor);
-    inst.pivot.copy(obj.pivot);
-    inst.skew.copy(obj.skew);
-    inst.visible = obj.visible;
-
-    return inst;
-  },
-  text: function(obj) {
-    let inst = new PIXI.Text(obj.text, Object.assign({}, obj.style), window.devicePixelRatio);
-
-    inst.id = obj.id;
-    inst.type = obj.type;
-    inst.name = obj.name;
-    inst.position.copy(obj);
-    inst.rotation = obj.rotation;
-    inst.scale.copy(obj.scale);
-    inst.alpha = obj.alpha;
-    inst.anchor.copy(obj.anchor);
-    inst.pivot.copy(obj.pivot);
-    inst.skew.copy(obj.skew);
-    inst.visible = obj.visible;
-
-    return inst;
-  },
-};
-
-const updaters = {
-  container: function(inst, model) {
-    inst.name = model.name;
-    inst.x = model.x;
-    inst.y = model.y;
-    inst.rotation = model.rotation,
-    inst.scale.copy(model.scale);
-    inst.alpha = model.alpha;
-    inst.pivot.copy(model.pivot);
-    inst.skew.copy(model.skew);
-    inst.visible = model.visible;
-  },
-  sprite: function(inst, model) {
-    updaters.container(inst, model);
-
-    inst.anchor.copy(model.anchor);
-    inst.blendMode = PIXI.BLEND_MODES[model.blendMode];
-    inst.texture = model.texture;
-  },
-  text: function(inst, model) {
-    updaters.container(inst, model);
-
-    inst.anchor.copy(model.anchor);
-    inst.blendMode = PIXI.BLEND_MODES[model.blendMode];
-    inst.text = model.text;
-    inst.style.font = model.style.font;
-    inst.style.fill = model.style.fill;
-
-    // Force redraw
-    inst.dirty = true;
-  },
-};
+import { models } from 'editor/model';
 
 const SELECT_BOUND_THICKNESS = 1;
 
@@ -378,10 +293,8 @@ class Editor extends Scene {
         name: 'info_text',
         x: 40,
         y: 200,
-        style: {
-          font: 'bold 64px Arial',
-          fill: 'white',
-        },
+        font: 'bold 64px Arial',
+        fill: 'white',
         text: 'It Works!',
       });
       // this.operate('object.SELECT', 0);
@@ -403,12 +316,13 @@ class Editor extends Scene {
   }
 
   updateView(model) {
-    console.log(this.model === model ? 'model not changed' : 'model changed');
+    if (this.model === model) return;
+
+    // Save new model state
     this.model = model;
 
     // Objects are changed
     if (this.prevObjects !== model.data.objects) {
-      console.log('update objects view');
       this.prevObjects = model.data.objects;
 
       // Update instances
@@ -425,7 +339,6 @@ class Editor extends Scene {
     }
 
     if (this.prevChildren !== model.data.children) {
-      console.log('update scene tree');
       this.prevChildren = model.data.children;
 
       // TODO: update hierarchy
@@ -437,18 +350,23 @@ class Editor extends Scene {
       this.select(model.context.selected);
     });
   }
-  updateInstance(id, model) {
+  updateInstance(id, state) {
     let inst = this.instMap[id];
+
     // Update exist instances
     if (inst) {
-      updaters[model.type](inst, model);
+      models[state.type].updateInst(state, inst);
     }
     // Create new instances
     else {
-      inst = creators[model.type](model).addTo(this.objLayer);
+      inst = models[state.type].createInst(state).addTo(this.objLayer);
       this.instMap[id] = inst;
+
+      console.log(state);
+      console.log(inst);
+
       // TODO: only enable this on selectable objects
-      if (model.type !== 'container') {
+      if (state.type !== 'container') {
         this.enableClickSelect(inst);
       }
     }
@@ -456,7 +374,7 @@ class Editor extends Scene {
 
   // APIs
   add(objModel) {
-    this.instMap[objModel.id] = this['create' + objModel.type](objModel);
+    this.instMap[objModel.id] = models[objModel.type].createInst(objModel);
   }
   remove(id) {
     this.instMap[id].remove();
