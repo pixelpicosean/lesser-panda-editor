@@ -1,9 +1,5 @@
-import * as container from './container';
-import * as sprite from './sprite';
-import * as text from './text';
+import './container';
+import './sprite';
+import './text';
 
-export default {
-  container,
-  sprite,
-  text,
-};
+export * from './model';

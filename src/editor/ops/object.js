@@ -2,9 +2,7 @@ import ops from './index';
 import Timer from 'engine/timer';
 import { removeItems } from 'engine/utils';
 
-import model from 'editor/model';
-
-let nextObjId = 0;
+import { models } from 'editor/model';
 
 // Add operators to "object" namespace
 ops.registerOperator('object', 'SELECT', {
@@ -15,10 +13,10 @@ ops.registerOperator('object', 'SELECT', {
 
 ops.registerOperator('object', 'ADD', {
   execute: (state, param) => {
-    console.log('ADD');
+    console.log(`ADD: ${param.type}`);
 
     // Create object instance
-    const obj = model[param.type].create(nextObjId++, param);
+    const obj = models[param.type].create(param);
 
     // Save to object store
     state.data.objects.set(obj.id, obj);
@@ -39,7 +37,7 @@ ops.registerOperator('object', 'UPDATE', {
   execute: (state, param) => {
     if (state.context.selected === -1) return;
     const target = state.data.objects[state.context.selected];
-    model[target.type].update(target, param);
+    models[target.type].update(target, param);
   },
 });
 
