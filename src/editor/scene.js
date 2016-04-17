@@ -60,12 +60,15 @@ class Editor extends Scene {
     Mousetrap.bind('meta+z', () => this.events.emit('undo'));
     Mousetrap.bind('meta+shift+z', () => this.events.emit('redo'));
     Mousetrap.bind('shift+a', () => this.events.emit('add'));
+    Mousetrap.bind('x', () => this.events.emit('remove'));
     Mousetrap.bind('g', () => this.events.emit('transform', 'g'));
     Mousetrap.bind('r', () => this.events.emit('transform', 'r'));
     Mousetrap.bind('s', () => this.events.emit('transform', 's'));
 
     // Event streams
     this.add$ = R.fromEvents(this.events, 'add');
+    this.remove$ = R.fromEvents(this.events, 'remove')
+      .filter(() => this.model.context.selected !== -1);
 
     let esc$ = R.fromEvents(this.events, 'esc');
     let enter$ = R.fromEvents(this.events, 'enter');
@@ -285,6 +288,7 @@ class Editor extends Scene {
     this.handlers = {
       select: (id) => this.operate('object.SELECT', id),
       add: () => this.operate('ui.SHOW_ASSETS', insertSprite),
+      remove: () => this.operate('object.REMOVE', this.model.context.selected),
     };
   }
   awake() {
@@ -293,6 +297,8 @@ class Editor extends Scene {
       .onValue(this.handlers.select);
     this.add$
       .onValue(this.handlers.add);
+    this.remove$
+      .onValue(this.handlers.remove);
 
     // Tests
     setTimeout(() => {
@@ -321,6 +327,8 @@ class Editor extends Scene {
       .offValue(this.handlers.select);
     this.add$
       .offValue(this.handlers.add);
+    this.remove$
+      .offValue(this.handlers.remove);
   }
 
   updateView(model) {

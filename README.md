@@ -17,5 +17,8 @@ Control methods is inspired by Blender, you need to use keyboard shortcuts inste
 - `s` to enter scale mode, move mouse near or far from the object to scale it.
 - `esc` to exit any transform mode and reset object.
 - `enter` to confirm changes in any transform mode.
+- `x` to remove selected object.
+- `meta+z` to undo last change.
+- `meta+shift+z` to redo.
 
 Also you can left click to confirm changes which performs the same of `enter`.
