@@ -52,6 +52,7 @@ const editor = (elm, view2d) => {
   let present = store.get();
   let future = [];
   let lastIsUndoable = false;
+  let isBatch = false;
   ops.registerOperator('data', 'UNDO', {
     execute: () => {
       const prev = past.pop();
@@ -79,7 +80,8 @@ const editor = (elm, view2d) => {
     },
   });
   state$.onValue((newState) => {
-    if (!lastIsUndoable) {
+    if (isBatch) {}
+    else if (!lastIsUndoable) {
       present = newState;
     }
     else if (present !== newState) {
@@ -91,10 +93,11 @@ const editor = (elm, view2d) => {
 
   // Operation dispatcher
   const index = (o, i) => (o ? o[i] : undefined);
+  const batch = (v) => { isBatch = !!v; };
   const operate = (actStr, param) => {
     let operator = actStr.split('.').reduce(index, ops);
     if (operator) {
-      lastIsUndoable = !!(operator.execute(store.get(), param));
+      lastIsUndoable = !!(operator.execute(store.get(), param, batch));
     }
     else {
       console.log(`WARNING: operator "${actStr}" not found`);
