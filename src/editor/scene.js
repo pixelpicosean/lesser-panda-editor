@@ -27,7 +27,6 @@ class Editor extends Scene {
 
     this.operate = null;
 
-    this.prevSelected;
     this.prevChildren;
     this.prevObjects;
 
@@ -168,7 +167,7 @@ class Editor extends Scene {
     confirmTransform$
       .filterBy(isTranslating$)
       .onValue(() => {
-        let inst = this.instMap[this.prevSelected];
+        let inst = this.instMap[this.model.context.selected];
 
         // TODO: Group update
         this.operate('object.UPDATE', {
@@ -180,7 +179,7 @@ class Editor extends Scene {
     cancelTransform$
       .filterBy(isTranslating$)
       .onValue(() => {
-        let id = this.prevSelected;
+        let id = this.model.context.selected;
 
         let model = this.model.data.objects[id];
         let inst = this.instMap[id];
@@ -209,7 +208,7 @@ class Editor extends Scene {
     confirmTransform$
       .filterBy(isRotating$)
       .onValue(() => {
-        let inst = this.instMap[this.prevSelected];
+        let inst = this.instMap[this.model.context.selected];
 
         this.operate('object.UPDATE', {
           rotation: inst.rotation,
@@ -219,7 +218,7 @@ class Editor extends Scene {
     cancelTransform$
       .filterBy(isRotating$)
       .onValue(() => {
-        let id = this.prevSelected;
+        let id = this.model.context.selected;
 
         let model = this.model.data.objects[id];
         let inst = this.instMap[id];
@@ -250,7 +249,7 @@ class Editor extends Scene {
     confirmTransform$
       .filterBy(isScaling$)
       .onValue(() => {
-        let inst = this.instMap[this.prevSelected];
+        let inst = this.instMap[this.model.context.selected];
 
         // TODO: group operation
         this.operate('object.UPDATE', {
@@ -262,7 +261,7 @@ class Editor extends Scene {
     cancelTransform$
       .filterBy(isRotating$)
       .onValue(() => {
-        let id = this.prevSelected;
+        let id = this.model.context.selected;
 
         let model = this.model.data.objects[id];
         let inst = this.instMap[id];
@@ -354,10 +353,7 @@ class Editor extends Scene {
     }
 
     // Update select display
-    this.prevSelected = model.context.selected;
-    Timer.later(40, () => {
-      this.select(model.context.selected);
-    });
+    this.select(model.context.selected);
   }
   updateInstance(id, state) {
     let inst = this.instMap[id];
