@@ -420,7 +420,9 @@ class Editor extends Scene {
   enableClickSelect(obj) {
     obj.interactive = true;
     obj.on('mousedown', (e) => {
-      this.events.emit('clickObject', obj.id);
+      setTimeout(() => {
+        this.events.emit('clickObject', obj.id);
+      }, 0);
       e.stopPropagation();
     });
   }
