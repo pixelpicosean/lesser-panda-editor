@@ -71,9 +71,9 @@ class Editor extends Scene {
     let esc$ = R.fromEvents(this.events, 'esc');
     let enter$ = R.fromEvents(this.events, 'enter');
 
-    this.stage.interactive = true;
-    this.stage.containsPoint = () => true;
-    let mousemove$ = R.fromEvents(this.stage, 'mousemove');
+    this.bgLayer.interactive = true;
+    this.bgLayer.containsPoint = () => true;
+    let mousemove$ = R.fromEvents(this.bgLayer, 'mousemove');
     let mousedown$ = R.fromEvents(engine.view, 'mousedown');
 
     // Un-focus inputs when click on the mousedown
