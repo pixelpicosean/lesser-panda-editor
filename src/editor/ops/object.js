@@ -7,7 +7,10 @@ import { models } from 'editor/model';
 // Add operators to "object" namespace
 ops.registerOperator('object', 'SELECT', {
   execute: (state, param) => {
-    return state.context.set('selected', param);
+    state.context.set('selected', param);
+
+    // Not undoable
+    return false;
   },
 });
 
@@ -30,6 +33,9 @@ ops.registerOperator('object', 'ADD', {
     else {
       state.data.children.push(obj.id);
     }
+
+    // Undoable
+    return true;
   },
 });
 
@@ -38,6 +44,9 @@ ops.registerOperator('object', 'UPDATE', {
     if (state.context.selected === -1) return;
     const target = state.data.objects[state.context.selected];
     models[target.type].update(target, param);
+
+    // Undoable
+    return true;
   },
 });
 
@@ -49,6 +58,7 @@ ops.registerOperator('object', 'REMOVE', {
     // Select nothing
     model.context.selected = -1;
 
-    return model;
+    // Undoable
+    return true;
   },
 });

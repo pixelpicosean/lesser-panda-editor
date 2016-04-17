@@ -47,12 +47,54 @@ const editor = (elm, view2d) => {
   const state$ = R.fromEvents(store, 'update')
     .toProperty(() => store.get());
 
+  // Undo/redo
+  let past = [];
+  let present = store.get();
+  let future = [];
+  let lastIsUndoable = false;
+  ops.registerOperator('data', 'UNDO', {
+    execute: () => {
+      const prev = past.pop();
+      if (prev) {
+        future.unshift(present);
+        present = prev;
+
+        store.set(present);
+      }
+
+      return false;
+    },
+  });
+  ops.registerOperator('data', 'REDO', {
+    execute: () => {
+      const next = future.shift();
+      if (next) {
+        past.push(present);
+        present = next;
+
+        store.set(present);
+      }
+
+      return false;
+    },
+  });
+  state$.onValue((newState) => {
+    if (!lastIsUndoable) {
+      present = newState;
+    }
+    else if (present !== newState) {
+      past.push(present);
+      present = newState;
+      future.length = 0;
+    }
+  });
+
   // Operation dispatcher
   const index = (o, i) => (o ? o[i] : undefined);
   const operate = (actStr, param) => {
     let operator = actStr.split('.').reduce(index, ops);
     if (operator) {
-      operator.execute(store.get(), param);
+      lastIsUndoable = !!(operator.execute(store.get(), param));
     }
     else {
       console.log(`WARNING: operator "${actStr}" not found`);

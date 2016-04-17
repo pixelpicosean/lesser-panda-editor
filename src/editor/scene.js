@@ -86,7 +86,11 @@ class Editor extends Scene {
     // Undo/Redo
     R.fromEvents(this.events, 'undo')
       .onValue(() => {
-        // this.model.rewind();
+        this.operate('data.UNDO');
+      });
+    R.fromEvents(this.events, 'redo')
+      .onValue(() => {
+        this.operate('data.REDO');
       });
 
 
