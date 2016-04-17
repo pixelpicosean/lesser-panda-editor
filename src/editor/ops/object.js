@@ -50,13 +50,30 @@ ops.registerOperator('object', 'UPDATE', {
   },
 });
 
-ops.registerOperator('object', 'REMOVE', {
-  execute: (model, param) => {
-    // Remove model and instance
-    model.data.removeObject(model.context.selected);
+function recRemove(arr, id) {
+  let i = arr.indexOf(id);
+  if (i !== -1) {
+    arr.splice(i, 1);
+  }
+  else {
+    arr.forEach(obj => recRemove(obj.children, id));
+  }
+}
 
-    // Select nothing
-    model.context.selected = -1;
+ops.registerOperator('object', 'REMOVE', {
+  execute: (state, param, batch) => {
+    batch(true);
+
+    // Remove object from node tree
+    recRemove(state.data.children, param);
+
+    // Remove object model
+    state.data.objects.remove(`${param}`);
+
+    // Deselect
+    state.context.set('selected', -1);
+
+    batch(false);
 
     // Undoable
     return true;
