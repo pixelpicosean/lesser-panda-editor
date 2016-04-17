@@ -22,7 +22,7 @@ const readonly = (key, value) => h(`li.${css.prop}`, [
 ]);
 
 const text = (key, value) => {
-  const changed = (e) => operate('object.UPDATE', [key, e.target.value]);
+  const changed = (e) => operate('object.UPDATE', { [key]: e.target.value });
   return h(`li.${css.prop}`, [
     h(`div.${css.key}`, key),
     h(`input.${css.value}.${css.text}`, {
@@ -36,7 +36,7 @@ const text = (key, value) => {
 };
 
 const number = (key, value) => {
-  const changed = (e) => operate('object.UPDATE', [key, e.target.value]);
+  const changed = (e) => operate('object.UPDATE', { [key]: e.target.value });
   return h(`li.${css.prop}`, [
     h(`div.${css.key}`, key),
     h(`input.${css.value}.${css.number}`, {
@@ -52,7 +52,7 @@ const number = (key, value) => {
 let colorPicker;
 const color = (key, value) => {
   const changed = (c) => {
-    operate('object.UPDATE', [key, c]);
+    operate('object.UPDATE', { [key]: c });
   };
   const inputChanged = (e) => {
     colorPicker.setColor(e.target.value);

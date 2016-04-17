@@ -167,8 +167,10 @@ class Editor extends Scene {
         let inst = this.instMap[this.prevSelected];
 
         // TODO: Group update
-        this.operate('object.UPDATE', ['x', inst.position.x]);
-        this.operate('object.UPDATE', ['y', inst.position.y]);
+        this.operate('object.UPDATE', {
+          x: inst.position.x,
+          y: inst.position.y,
+        });
       });
     // Cancle translate
     cancelTransform$
@@ -205,7 +207,9 @@ class Editor extends Scene {
       .onValue(() => {
         let inst = this.instMap[this.prevSelected];
 
-        this.operate('object.UPDATE', ['rotation', inst.rotation]);
+        this.operate('object.UPDATE', {
+          rotation: inst.rotation,
+        });
       });
     // Cancle rotate
     cancelTransform$
@@ -245,8 +249,10 @@ class Editor extends Scene {
         let inst = this.instMap[this.prevSelected];
 
         // TODO: group operation
-        this.operate('object.UPDATE', ['scaleX', inst.scale.x]);
-        this.operate('object.UPDATE', ['scaleY', inst.scale.y]);
+        this.operate('object.UPDATE', {
+          scaleX: inst.scale.x,
+          scaleY: inst.scale.y,
+        });
       });
     // Cancle scale
     cancelTransform$

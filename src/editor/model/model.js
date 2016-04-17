@@ -99,13 +99,7 @@ class Model {
     return state;
   }
   update(state, param) {
-    if (this.propKeys.indexOf(param[0]) !== -1) {
-      state.set(param[0], param[1]);
-      return true;
-    }
-    else {
-      return false;
-    }
+    state.set(param);
   }
 
   createInst(state) {
